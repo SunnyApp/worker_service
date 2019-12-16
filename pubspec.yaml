@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  isolate: any
+  isolate: ^2.0.2
 
 dev_dependencies:
   flutter_test:
