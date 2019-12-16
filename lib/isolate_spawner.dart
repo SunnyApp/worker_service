@@ -24,14 +24,16 @@ class InitializerWithParam<P> {
 }
 
 /// Spawns a new isolate with any extra processing.  It's required to have a top-level spawner method
-IsolateRunnerFactory spawnIsolate(RunnerBuilder factory) => (() => _spawn(factory));
+IsolateRunnerFactory spawnIsolate(RunnerBuilder factory) =>
+    (() => _spawn(factory));
 
 /// Creates a single [IsolateRunner]
 ///
 /// This code was copied from the `isolate` library, to allow for injecting initialization and tear down.
 Future<IsolateRunner> _spawn(RunnerBuilder factory) async {
   var channel = SingleResponseChannel();
-  var isolate = await Isolate.spawn(_create, channel.port, debugName: factory.debugName);
+  var isolate =
+      await Isolate.spawn(_create, channel.port, debugName: factory.debugName);
 
   // The runner can be used to run multiple independent functions.
   // An accidentally uncaught error shouldn't ruin it for everybody else.

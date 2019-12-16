@@ -125,7 +125,8 @@ class RunnerBuilder {
   }
 
   /// Adds an initializer - this is run on each isolate that's spawned, and contains any common setup.
-  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init, [P param]) {
+  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init,
+      [P param]) {
     assert(init != null);
     _isolateInitializers.add(InitializerWithParam<P>(param, init));
   }
@@ -145,4 +146,3 @@ class RunnerBuilder {
     }
   }
 }
-

@@ -7,7 +7,8 @@ import 'package:isolate/isolate.dart';
 class IsolateService implements Runner {
   FutureOr<Runner> _runner;
   final Duration defaultTimeout;
-  IsolateService(Future<Runner> spawner, this.defaultTimeout) : _runner = spawner {
+  IsolateService(Future<Runner> spawner, this.defaultTimeout)
+      : _runner = spawner {
     spawner.then((resolved) {
       _runner = resolved;
     });
@@ -22,7 +23,9 @@ class IsolateService implements Runner {
     return _shutdownFuture ??= (await _runner).close();
   }
 
-  FutureOr<E> withRunner<E>({FutureOr<E> isolate(IsolateRunner runner), FutureOr<E> lb(LoadBalancer runner)}) {
+  FutureOr<E> withRunner<E>(
+      {FutureOr<E> isolate(IsolateRunner runner),
+      FutureOr<E> lb(LoadBalancer runner)}) {
     final r = _runner;
 
     FutureOr<E> _(final Runner runner) {
@@ -43,7 +46,8 @@ class IsolateService implements Runner {
   }
 
   Stream<dynamic> get errors async* {
-    final stream = await withRunner(isolate: (isolate) => isolate.errors, lb: (lb) => Stream.empty());
+    final stream = await withRunner(
+        isolate: (isolate) => isolate.errors, lb: (lb) => Stream.empty());
     await for (final e in stream) {
       yield e;
     }
@@ -51,7 +55,9 @@ class IsolateService implements Runner {
 
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {Duration timeout, FutureOr<R> Function() onTimeout, bool ignoreShutdown = false}) async {
+      {Duration timeout,
+      FutureOr<R> Function() onTimeout,
+      bool ignoreShutdown = false}) async {
     final r = await _runner;
     if (isShuttingDown && !ignoreShutdown) {
       throw "This service is shutting down";
@@ -61,13 +67,16 @@ class IsolateService implements Runner {
           if (lb.length == 0) {
             throw "No active isolates";
           }
-          return lb.run(function, argument, timeout: timeout ?? defaultTimeout, onTimeout: onTimeout);
+          return lb.run(function, argument,
+              timeout: timeout ?? defaultTimeout, onTimeout: onTimeout);
         },
-        isolate: (i) => i.run(function, argument, timeout: timeout ?? defaultTimeout, onTimeout: onTimeout));
+        isolate: (i) => i.run(function, argument,
+            timeout: timeout ?? defaultTimeout, onTimeout: onTimeout));
   }
 
   Future kill([Duration timeout = const Duration(seconds: 1)]) {
-    _shutdownFuture = withRunner(lb: (lb) => runner.close(), isolate: (i) => i.kill(timeout: timeout));
+    _shutdownFuture = withRunner(
+        lb: (lb) => runner.close(), isolate: (i) => i.kill(timeout: timeout));
     return _shutdownFuture;
   }
 
@@ -114,7 +123,8 @@ extension RunnerExtension on Runner {
     return await self.close();
   }
 
-  Future<O> execute<Null, O>(FutureOr<O> block(Null v), {Duration timeout, FutureOr<O> onTimeout()}) async {
+  Future<O> execute<Null, O>(FutureOr<O> block(Null v),
+      {Duration timeout, FutureOr<O> onTimeout()}) async {
     return await this.run(block, null, timeout: timeout, onTimeout: onTimeout);
   }
 }
