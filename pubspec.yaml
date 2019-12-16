@@ -2,14 +2,14 @@ name: isolate_service
 description: A new Flutter package project.
 version: 0.0.1
 author:
-homepage:
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  isolate: ^2.0.2
 
 dev_dependencies:
   flutter_test:
