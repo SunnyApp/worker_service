@@ -35,8 +35,7 @@ Future<IsolateRunner> _spawn(RunnerBuilder factory) async {
   var isolate =
       await Isolate.spawn(_create, channel.port, debugName: factory.debugName);
 
-  // The runner can be used to run multiple independent functions.
-  // An accidentally uncaught error shouldn't ruin it for everybody else.
+  // Whether an uncaught exception should kill the isolate
   isolate.setErrorsFatal(factory.failOnError);
   var pingChannel = SingleResponseChannel();
   isolate.ping(pingChannel.port);
@@ -47,22 +46,22 @@ Future<IsolateRunner> _spawn(RunnerBuilder factory) async {
     await factory.initialize(result);
   } catch (e, stack) {
     print(stack);
+    await result.close();
     rethrow;
   }
   // Guarantees that setErrorsFatal has completed.
   await pingChannel.result;
 
-  // Not sure why this work...
-//  if (factory.autoclose) {
-//    final shutdownChannel = SingleResponseChannel();
-//    Isolate.current.addOnExitListener(commandPort,
-//        response: List(2)
-//          ..[0] = _SHUTDOWN
-//          ..[1] = shutdownChannel.port);
-//    shutdownChannel.result.then((result) {
-//      print("Got kill signal");
-//    }).ignored();
-//  }
+  if (factory.autoclose) {
+    // I tried using my own channel for this
+    final shutdownResponse = SingleResponseChannel(callback: (_) {
+      print(
+          "############  SHUTDOWN ${factory.debugNameBase}  ##################");
+    });
+    Isolate.current.addOnExitListener(commandPort,
+        response: [_SHUTDOWN, shutdownResponse.port]);
+  }
+
   return result;
 }
 

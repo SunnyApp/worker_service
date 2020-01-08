@@ -1,7 +1,6 @@
 library isolate_service;
 
 import 'dart:async';
-import 'dart:isolate';
 
 import 'package:isolate/isolate.dart';
 import 'package:isolate/load_balancer.dart';
@@ -54,7 +53,7 @@ class RunnerFactory {
 
     configure?.call(builder);
 
-    return IsolateService(_spawn(builder), builder.defaultTimeout);
+    return IsolateService(builder, _spawn(builder));
   }
 
   Future<Runner> _spawn(RunnerBuilder builder) async {
@@ -81,9 +80,11 @@ class RunnerBuilder {
   var _spawnCount = 1;
 
   /// Whether this isolate or pool should fail when an error is encountered.
-  bool failOnError = true;
+  bool failOnError = false;
 
   Duration defaultTimeout = Duration(seconds: 30);
+
+  String get debugNameBase => _debugName;
 
   void withoutTimeout() {
     defaultTimeout = null;

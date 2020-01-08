@@ -1,6 +1,6 @@
 name: isolate_service
 description: A flutter package that uses the `isolate` package, and adds some convenience for working with isolates in Flutter.
-version: 0.4.5
+version: 0.4.6
 homepage: https://github.com/SunnyApp/isolate_service
 
 environment:
@@ -9,7 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  isolate: ^2.0.2
+#  isolate: ^2.0.2
+  isolate:
+    path: ../isolate
 
 dev_dependencies:
   flutter_test:
