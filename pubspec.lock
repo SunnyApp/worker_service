@@ -77,10 +77,10 @@ packages:
   isolate:
     dependency: "direct main"
     description:
-      path: "../isolate"
-      relative: true
-    source: path
-    version: "2.0.3"
+      name: isolate
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.2"
   matcher:
     dependency: transitive
     description:
