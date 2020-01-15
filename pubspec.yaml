@@ -9,9 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-#  isolate: ^2.0.2
-  isolate:
-    path: ../isolate
+  isolate: ^2.0.2
 
 dev_dependencies:
   flutter_test:
