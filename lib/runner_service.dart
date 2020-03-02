@@ -30,9 +30,7 @@ class IsolateService implements Runner {
     return Future.sync(() async => _shutdownFuture ??= (await _runner).close());
   }
 
-  Future<E> withRunner<E>(
-      {FutureOr<E> isolate(IsolateRunner runner),
-      FutureOr<E> lb(LoadBalancer runner)}) async {
+  Future<E> withRunner<E>({FutureOr<E> isolate(IsolateRunner runner), FutureOr<E> lb(LoadBalancer runner)}) async {
     final runner = await _runner;
     if (runner is IsolateRunner) {
       return Future.sync(() => isolate(runner));
@@ -44,8 +42,7 @@ class IsolateService implements Runner {
   }
 
   Stream<dynamic> get errors async* {
-    final Stream stream = await withRunner(
-        isolate: (isolate) => isolate.errors, lb: (lb) => Stream.empty());
+    final Stream stream = await withRunner(isolate: (isolate) => isolate.errors, lb: (lb) => Stream.empty());
     await for (final e in stream) {
       yield e;
     }
@@ -54,19 +51,16 @@ class IsolateService implements Runner {
   var i = 0;
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {String name,
-      Duration timeout,
-      FutureOr<R> onTimeout(),
-      bool ignoreShutdown = false}) async {
+      {String name, Duration timeout, FutureOr<R> onTimeout(), bool ignoreShutdown = false}) async {
     try {
       final runner = await _runner;
       if (isShuttingDown && ignoreShutdown != true) {
         throw "$debugName: This service is shutting down";
       }
-      final res = await Future.sync(() => runner.run(function, argument,
-          timeout: timeout ?? defaultTimeout,
-          onTimeout: onTimeout)).catchError((err) {
-        print("############ERR: $err");
+      final res = await Future.sync(
+              () => runner.run(function, argument, timeout: timeout ?? defaultTimeout, onTimeout: onTimeout))
+          .catchError((err) {
+        print("${name ?? 'unknown'}: isolate: $err");
       });
 
       return res;
