@@ -2,14 +2,18 @@ import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isolate/isolate_runner.dart';
+import 'package:isolate/runner.dart';
 import 'package:isolate_service/isolate_service.dart';
 
-globalOuter(IsolateRunner runner) async {
-  await addLog("global-outer: ${runner.isolate.debugName}:");
+globalOuter(Runner runner) async {
+  final _runner = runner as IsolateRunner;
+  await addLog("global-outer: ${_runner.isolate.debugName}:");
 }
 
-factoryOuter(IsolateRunner runner) async {
-  await addLog("factory-outer: ${runner.isolate.debugName}:");
+factoryOuter(Runner runner) async {
+  final _runner = runner as IsolateRunner;
+
+  await addLog("factory-outer: ${_runner.isolate.debugName}:");
 }
 
 class Data {
@@ -35,8 +39,7 @@ Future<bool> ping(String name) async {
   return ping;
 }
 
-Future addLog(value) async =>
-    Data.logs.add("$value ${Isolate.current.debugName}");
+Future addLog(value) async => Data.logs.add("$value ${Isolate.current.debugName}");
 
 final runners = <String, IsolateService>{};
 

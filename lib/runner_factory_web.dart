@@ -2,78 +2,34 @@ library isolate_service;
 
 import 'dart:async';
 
-import 'package:isolate/isolate.dart';
-import 'package:isolate/load_balancer.dart';
-import 'package:isolate_service/isolate_spawner.dart';
-import 'package:isolate_service/runner_service.dart';
+import 'package:isolate/runner.dart';
+import 'package:isolate_service/runners_web.dart';
 
 import 'common.dart';
 
-/// Contains the initializers necessary to construct a specific type of isolate.  Any initializers added to
-/// [RunnerFactory.global] will be applied to all isolates produced by this application.
-///
-/// To construct an isolate [Runner], call the [create] method, with an optional builder.  eg.
-/// ``` dart
-/// final IsolateService runner = RunnerFactory.global.create((builder) => builder
-///     ..poolSize = 3
-///     ..debugName = "widgetMaker"
-///     ..autoclose = true
-/// );
-///
-/// await runner.run(...);
-///
-/// ```
+/// Creates for web
 class RunnerFactory {
-  final _onIsolateCreated = <IsolateInitializer>[];
-  final _isolateInitializers = <InitializerWithParam>[];
-
   /// Adds an initializer - this consumes the [IsolateRunner] and performs some action on it
-  void onIsolateCreated(
-    IsolateInitializer init,
-  ) {
-    assert(init != null);
-    _onIsolateCreated.add(init);
-  }
+  void onIsolateCreated(IsolateInitializer init) {}
 
   /// Adds an initializer - this is run on each isolate that's spawned, and contains any common setup.
-  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init, P param) {
-    assert(init != null);
-    _isolateInitializers.add(InitializerWithParam<P>(param, init));
-  }
+  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init, P param) {}
 
   static RunnerFactory global = RunnerFactory();
 
   IsolateService create([void configure(RunnerBuilder builder)]) {
-    final builder = RunnerBuilder._();
-    this._isolateInitializers.forEach((i) {
-      builder.addIsolateInitializer(i.init, i.param);
-    });
-
-    this._onIsolateCreated.forEach((i) {
-      builder.onIsolateCreated(i);
-    });
-
-    configure?.call(builder);
-
-    return IsolateService(builder, _spawn(builder));
+    return IsolateService(RunnerBuilder._(), Future.value(SameIsolateRunner()));
   }
+}
 
-  Future<Runner> _spawn(RunnerBuilder builder) async {
-    final spawner = spawnIsolate(builder);
-    Runner result;
-    if (builder.poolSize == 1) {
-      /// Create a single runner
-      result = await spawner();
-    } else if (builder.poolSize > 1) {
-      result = await LoadBalancer.create(builder.poolSize, spawner);
-    } else {
-      throw "Invalid runner configuration.  Pool size must be at least 1";
-    }
+class SameIsolateRunner implements Runner {
+  @override
+  Future<void> close() async {}
 
-    if (builder.autoclose) {
-      result.closeWhenParentIsolateExits().ignored();
-    }
-    return result;
+  @override
+  Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
+      {Duration timeout, FutureOr<R> Function() onTimeout}) {
+    return Future.value(function(argument));
   }
 }
 
@@ -133,7 +89,7 @@ class RunnerBuilder {
     _isolateInitializers.add(InitializerWithParam<P>(param, init));
   }
 
-  Future initialize(IsolateRunner target) async {
+  Future initialize(Runner target) async {
     try {
       for (final onCreate in _onIsolateCreated) {
         await onCreate(target);

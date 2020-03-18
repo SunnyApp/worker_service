@@ -4,36 +4,18 @@ import 'dart:isolate';
 import 'package:isolate/isolate.dart';
 import 'package:isolate/isolate_runner.dart';
 
+import 'common.dart';
 import 'runner_factory.dart';
 
-/// Produces IsolateRunner instances, including any initialization to the isolate(s) created.
-typedef IsolateRunnerFactory = Future<IsolateRunner> Function();
-
-/// Given a newly created [IsolateRunner], ensures that the isolate(s) that back the [IsolateRunner] are
-/// initialized properly
-typedef IsolateInitializer = FutureOr Function(IsolateRunner runner);
-
-/// Initializer that runs inside the isolate.
-typedef RunInsideIsolateInitializer<P> = FutureOr Function(P param);
-
-class InitializerWithParam<P> {
-  final P param;
-  final RunInsideIsolateInitializer<P> init;
-
-  InitializerWithParam(this.param, this.init);
-}
-
 /// Spawns a new isolate with any extra processing.  It's required to have a top-level spawner method
-IsolateRunnerFactory spawnIsolate(RunnerBuilder factory) =>
-    (() => _spawn(factory));
+IsolateRunnerFactory spawnIsolate(RunnerBuilder factory) => (() => _spawn(factory));
 
 /// Creates a single [IsolateRunner]
 ///
 /// This code was copied from the `isolate` library, to allow for injecting initialization and tear down.
 Future<IsolateRunner> _spawn(RunnerBuilder factory) async {
   var channel = SingleResponseChannel();
-  var isolate =
-      await Isolate.spawn(_create, channel.port, debugName: factory.debugName);
+  var isolate = await Isolate.spawn(_create, channel.port, debugName: factory.debugName);
 
   // Whether an uncaught exception should kill the isolate
   isolate.setErrorsFatal(factory.failOnError);
@@ -55,11 +37,9 @@ Future<IsolateRunner> _spawn(RunnerBuilder factory) async {
   if (factory.autoclose) {
     // I tried using my own channel for this
     final shutdownResponse = SingleResponseChannel(callback: (_) {
-      print(
-          "############  SHUTDOWN ${factory.debugNameBase}  ##################");
+      print("############  SHUTDOWN ${factory.debugNameBase}  ##################");
     });
-    Isolate.current.addOnExitListener(commandPort,
-        response: [_SHUTDOWN, shutdownResponse.port]);
+    Isolate.current.addOnExitListener(commandPort, response: [_SHUTDOWN, shutdownResponse.port]);
   }
 
   return result;
