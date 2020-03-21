@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isolate_service/isolate_service.dart';
 
@@ -6,6 +8,7 @@ import 'isolate_test_inits.dart';
 void main() {
   group("all", () {
     setUpAll(() {
+      final import = Isolate.current;
       RunnerFactory.global.onIsolateCreated(globalOuter);
       RunnerFactory.global.addIsolateInitializer(addLog, "global-inner:");
     });
@@ -17,7 +20,7 @@ void main() {
     test("Killing parent isolate autocloses all children", () async {
       final parent = await RunnerFactory.global
           .create((_) => _
-            ..debugName = "parentIsolate"
+            ..debugName = 'parentIsolate'
             ..poolSize = 1
             ..failOnError = true
             ..defaultTimeout = Duration(seconds: 60)
@@ -25,9 +28,9 @@ void main() {
           .ready();
 
       parent.errors.forEach((error) {
-        print("##############################################################");
+        print('##############################################################');
         print("$error");
-        print("##############################################################");
+        print('##############################################################');
       }).ignored();
 
       // Verify parent logs
@@ -57,9 +60,7 @@ void main() {
       await parent.close();
       await Future.delayed(Duration(milliseconds: 100));
       final parentPing2 = await parent.ping();
-      expect(parentPing2, equals(false),
-          reason:
-              "After killing the parent isolate, a ping to the parent should fail");
+      expect(parentPing2, equals(false), reason: "After killing the parent isolate, a ping to the parent should fail");
     });
 
     test("Initializers run", () async {

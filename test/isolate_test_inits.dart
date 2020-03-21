@@ -1,6 +1,5 @@
 import 'dart:isolate';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:isolate/isolate_runner.dart';
 import 'package:isolate/runner.dart';
 import 'package:isolate_service/isolate_service.dart';
@@ -13,7 +12,7 @@ globalOuter(Runner runner) async {
 factoryOuter(Runner runner) async {
   final _runner = runner as IsolateRunner;
 
-  await addLog("factory-outer: ${_runner.isolate.debugName}:");
+  await addLog('factory-outer: ${_runner.isolate.debugName}:');
 }
 
 class Data {
@@ -41,7 +40,7 @@ Future<bool> ping(String name) async {
 
 Future addLog(value) async => Data.logs.add("$value ${Isolate.current.debugName}");
 
-final runners = <String, IsolateService>{};
+final runners = <String, RunnerService>{};
 
 testInnerProcess(String debugName) async {
   final pool = RunnerFactory.global.create((_) => _
@@ -49,7 +48,7 @@ testInnerProcess(String debugName) async {
     ..poolSize = 3
     ..defaultTimeout = Duration(seconds: 2)
     ..addIsolateInitializer(addLog, "factory-inner:")
-    ..onIsolateCreated(factoryOuter)
+    ..addOnIsolateCreated(factoryOuter)
     ..autoclose = true);
   await pool.ready();
   runners[debugName] = pool;
