@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   isolate: ^2.0.3
-  pedantic:
+  pedantic: ^1.9.0
 
 dev_dependencies:
   flutter_test:
