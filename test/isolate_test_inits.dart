@@ -38,7 +38,8 @@ Future<bool> ping(String name) async {
   return ping;
 }
 
-Future addLog(value) async => Data.logs.add("$value ${Isolate.current.debugName}");
+Future addLog(value) async =>
+    Data.logs.add("$value ${Isolate.current.debugName}");
 
 final runners = <String, RunnerService>{};
 

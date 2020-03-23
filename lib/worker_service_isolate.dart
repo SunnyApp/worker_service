@@ -86,7 +86,8 @@ FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
 /// This code was copied from the `isolate` library, to allow for injecting initialization and tear down.
 Future<IsolateRunner> spawnSingleRunner(RunnerBuilder factory) async {
   var channel = SingleResponseChannel();
-  var isolate = await Isolate.spawn(_create, channel.port, debugName: factory.debugName);
+  var isolate =
+      await Isolate.spawn(_create, channel.port, debugName: factory.debugName);
 
   // Whether an uncaught exception should kill the isolate
   isolate.setErrorsFatal(factory.failOnError);
@@ -108,9 +109,11 @@ Future<IsolateRunner> spawnSingleRunner(RunnerBuilder factory) async {
   if (factory.autoclose) {
     // I tried using my own channel for this
     final shutdownResponse = SingleResponseChannel(callback: (_) {
-      print('############  SHUTDOWN ${factory.debugNameBase}  ##################');
+      print(
+          '############  SHUTDOWN ${factory.debugNameBase}  ##################');
     });
-    Isolate.current.addOnExitListener(commandPort, response: [_SHUTDOWN, shutdownResponse.port]);
+    Isolate.current.addOnExitListener(commandPort,
+        response: [_SHUTDOWN, shutdownResponse.port]);
   }
 
   return result;
@@ -127,7 +130,8 @@ void _create(Object data) {
   initPort.send(remote.commandPort);
 }
 
-Future _initializeIsolateRunner(RunnerBuilder builder, IsolateRunner target) async {
+Future _initializeIsolateRunner(
+    RunnerBuilder builder, IsolateRunner target) async {
   try {
     for (final onCreate in builder.onIsolateCreated) {
       await onCreate(target);

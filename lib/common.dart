@@ -61,7 +61,8 @@ class RunnerBuilder {
   }
 
   /// Adds an initializer - this is run on each isolate that's spawned, and contains any common setup.
-  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init, [P param]) {
+  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init,
+      [P param]) {
     assert(init != null);
     isolateInitializers.add(InitializerWithParam<P>(param, init));
   }
@@ -119,15 +120,18 @@ class RunnerService implements Runner {
   var i = 0;
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {String name, Duration timeout, FutureOr<R> onTimeout(), bool ignoreShutdown = false}) async {
+      {String name,
+      Duration timeout,
+      FutureOr<R> onTimeout(),
+      bool ignoreShutdown = false}) async {
     try {
       final runner = await _runner;
       if (isShuttingDown && ignoreShutdown != true) {
         throw '$debugName: This service is shutting down';
       }
-      final res = await Future.sync(
-              () => runner.run(function, argument, timeout: timeout ?? defaultTimeout, onTimeout: onTimeout))
-          .catchError((err) {
+      final res = await Future.sync(() => runner.run(function, argument,
+          timeout: timeout ?? defaultTimeout,
+          onTimeout: onTimeout)).catchError((err) {
         print("${name ?? 'unknown'}: isolate: $err");
       });
 
@@ -160,7 +164,8 @@ class RunnerService implements Runner {
 }
 
 /// This should be implemented by the platform
-Future initializeRunner(RunnerBuilder builder, Runner target) async => throw 'not implemented for this platform';
+Future initializeRunner(RunnerBuilder builder, Runner target) async =>
+    throw 'not implemented for this platform';
 
 /// Produces IsolateRunner instances, including any initialization to the isolate(s) created.
 typedef IsolateRunnerFactory = Future<Runner> Function();

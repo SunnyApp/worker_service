@@ -60,7 +60,9 @@ void main() {
       await parent.close();
       await Future.delayed(Duration(milliseconds: 100));
       final parentPing2 = await parent.ping();
-      expect(parentPing2, equals(false), reason: "After killing the parent isolate, a ping to the parent should fail");
+      expect(parentPing2, equals(false),
+          reason:
+              "After killing the parent isolate, a ping to the parent should fail");
     });
 
     test("Initializers run", () async {
