@@ -1,7 +1,7 @@
-# isolate_service
+# worker_service
 
-[![pub package](https://img.shields.io/pub/v/isolate_service.svg)](https://pub.dartlang.org/packages/isolate_service)
-[![Coverage Status](https://coveralls.io/repos/github/SunnyApp/isolate_service/badge.svg?branch=master)](https://coveralls.io/github/SunnyApp/isolate_service?branch=master)
+[![pub package](https://img.shields.io/pub/v/worker_service.svg)](https://pub.dartlang.org/packages/worker_service)
+[![Coverage Status](https://coveralls.io/repos/github/SunnyApp/worker_service/badge.svg?branch=master)](https://coveralls.io/github/SunnyApp/worker_service?branch=master)
 
 A flutter package that uses the `isolate` package, and adds some convenience for working with isolates in 
 Flutter.  Isolates spawned with this library will be automatically destroyed and recreated when using 

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:isolate/runner.dart';
-import 'package:isolate_service/common.dart';
+import 'package:worker_service/common.dart';
 
 Stream<dynamic> getErrorsForRunner(Runner runner) => throw 'Not implemented for platform';
 

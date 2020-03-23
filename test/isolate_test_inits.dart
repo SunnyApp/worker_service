@@ -2,7 +2,7 @@ import 'dart:isolate';
 
 import 'package:isolate/isolate_runner.dart';
 import 'package:isolate/runner.dart';
-import 'package:isolate_service/isolate_service.dart';
+import 'package:worker_service/worker_service.dart';
 
 globalOuter(Runner runner) async {
   final _runner = runner as IsolateRunner;
@@ -42,7 +42,7 @@ Future addLog(value) async => Data.logs.add("$value ${Isolate.current.debugName}
 
 final runners = <String, RunnerService>{};
 
-testInnerProcess(String debugName) async {
+Future testInnerProcess(String debugName) async {
   final pool = RunnerFactory.global.create((_) => _
     ..debugName = debugName
     ..poolSize = 3

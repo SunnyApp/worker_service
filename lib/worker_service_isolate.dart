@@ -3,7 +3,7 @@ import 'dart:isolate';
 
 import 'package:isolate/isolate.dart';
 import 'package:isolate/isolate_runner.dart';
-import 'package:isolate_service/common.dart';
+import 'package:worker_service/common.dart';
 
 String get currentIsolateName {
   return Isolate.current.debugName;

@@ -1,7 +1,7 @@
 import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:isolate_service/isolate_service.dart';
+import 'package:worker_service/worker_service.dart';
 
 import 'isolate_test_inits.dart';
 

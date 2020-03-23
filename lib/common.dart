@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:isolate/load_balancer.dart';
 import 'package:isolate/runner.dart';
-import 'package:isolate_service/isolate_service.dart';
+import 'package:worker_service/worker_service.dart';
 
 typedef IsolateFunction<P, R> = FutureOr<R> Function(R input);
 
