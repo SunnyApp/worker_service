@@ -23,12 +23,12 @@ void main() {
   // 'allowInterop' is necessary to pass a function into js.
   onMessage = allowInterop((event) {
     var e = event as MessageEvent;
-    final invoker = e.data as RunnerInvocation;
+    final invoker = e.data;
     try {
-      final result = invoker.function?.call(invoker.argument);
-      postMessage(RunnerInvocationResult.success(invoker.id, result));
+      final result = DateTime.now().millisecondsSinceEpoch;
+      postMessage(RunnerInvocationResult.success(1, result));
     } catch (e) {
-      postMessage(RunnerInvocationResult.executionFailure(invoker.id, e));
+      postMessage(RunnerInvocationResult.executionFailure(1, e));
     }
   });
 }

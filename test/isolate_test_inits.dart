@@ -26,7 +26,7 @@ Future<List<String>> getLogs(String name) async {
     if (!runners.containsKey(name)) {
       throw "Missing runner: $name";
     }
-    return await runners[name].run(getLogs, null);
+    return (await runners[name].run(getLogs, null)) as List<String>;
   }
 }
 
@@ -35,15 +35,15 @@ Future<bool> ping(String name) async {
     throw "Missing runner: $name";
   }
   final ping = await runners[name].ping();
-  return ping;
+  return ping as bool;
 }
 
 Future addLog(value) async => Data.logs.add("$value ${Isolate.current.debugName}");
 
-final runners = <String, RunnerService>{};
+final runners = <String, WorkhorseService>{};
 
 Future testInnerProcess(String debugName) async {
-  final pool = RunnerFactory.global.create((_) => _
+  final pool = WorkhorseFactory.global.create((_) => _
     ..debugName = debugName
     ..poolSize = 3
     ..defaultTimeout = Duration(seconds: 2)

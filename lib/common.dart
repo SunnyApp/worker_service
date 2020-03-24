@@ -64,19 +64,19 @@ class RunnerBuilder {
 }
 
 /// Wraps a [Runner] and ensures that it's spawned before executing any operations
-class RunnerService implements Runner {
-  FutureOr<Runner> _runner;
+class WorkhorseService<P, R> implements Workhorse<P, R> {
+  FutureOr<Workhorse<P, R>> _workhorse;
   final RunnerBuilder builder;
 
   Duration get defaultTimeout => builder.defaultTimeout;
 
-  RunnerService(
+  WorkhorseService(
     this.builder,
-    Future<Runner> spawner,
+    Future<Workhorse<P, R>> workhorse,
   )   : assert(builder != null),
-        _runner = spawner {
-    spawner.then((resolved) {
-      _runner = resolved;
+        _workhorse = workhorse {
+    workhorse.then((resolved) {
+      _workhorse = resolved;
     });
   }
 
@@ -86,7 +86,7 @@ class RunnerService implements Runner {
 
   @override
   Future close() async {
-    return Future.sync(() async => _shutdownFuture ??= (await _runner).close());
+    return Future.sync(() => _shutdownFuture ??= Future.value(_workhorse).then((_) => _.close()));
   }
 
 //  Future<E> runInService<E>(
@@ -104,8 +104,8 @@ class RunnerService implements Runner {
 //  }
 
   Stream<dynamic> get errors async* {
-    final runner = await _runner;
-    final stream = getErrorsForRunner(runner);
+    final workhorse = await _workhorse;
+    final stream = getErrorsForRunner(workhorse);
 
     await for (final e in stream) {
       yield e;
@@ -114,15 +114,14 @@ class RunnerService implements Runner {
 
   var i = 0;
   @override
-  Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
+  Future<R> run(job, P argument,
       {String name, Duration timeout, FutureOr<R> onTimeout(), bool ignoreShutdown = false}) async {
     try {
-      final runner = await _runner;
+      final workhorse = await _workhorse;
       if (isShuttingDown && ignoreShutdown != true) {
         throw '$debugName: This service is shutting down';
       }
-      final res = await Future.sync(
-              () => runner.run(function, argument, timeout: timeout ?? defaultTimeout, onTimeout: onTimeout))
+      final res = await Future.sync(() => workhorse.run({"job": job}, argument, timeout: timeout ?? defaultTimeout))
           .catchError((err) {
         print("${name ?? 'unknown'}: isolate: $err");
       });
@@ -134,19 +133,19 @@ class RunnerService implements Runner {
   }
 
   Future kill([Duration timeout = const Duration(seconds: 1)]) async {
-    final runner = await _runner;
+    final runner = await _workhorse;
     _shutdownFuture = Future.value(killRunner(runner));
     return _shutdownFuture;
   }
 
   Future<bool> ping([Duration duration = const Duration(seconds: 1)]) async {
     if (isShuttingDown) return false;
-    return pingRunner(await _runner);
+    return pingRunner(await _workhorse);
   }
 
-  Future<RunnerService> ready() async {
-    final runner = await _runner;
-    _runner = runner;
+  Future<WorkhorseService<P, R>> ready() async {
+    final workhorse = await _workhorse;
+    _workhorse = workhorse;
     return this;
   }
 
@@ -176,7 +175,7 @@ class InitializerWithParam<P> {
 }
 
 /// Contains the initializers necessary to construct a specific type of isolate.  Any initializers added to
-/// [RunnerFactory.global] will be applied to all isolates produced by this application.
+/// [WorkhorseFactory.global] will be applied to all isolates produced by this application.
 ///
 /// To construct an isolate [Runner], call the [create] method, with an optional builder.  eg.
 /// ``` dart
@@ -189,7 +188,7 @@ class InitializerWithParam<P> {
 /// await runner.run(...);
 ///
 /// ```
-class RunnerFactory {
+class WorkhorseFactory<R, P> {
   final _onIsolateCreated = <IsolateInitializer>[];
   final _isolateInitializers = <InitializerWithParam>[];
 
@@ -202,14 +201,14 @@ class RunnerFactory {
   }
 
   /// Adds an initializer - this is run on each isolate that's spawned, and contains any common setup.
-  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init, P param) {
+  void addIsolateInitializer<PP>(RunInsideIsolateInitializer<PP> init, PP param) {
     assert(init != null);
-    _isolateInitializers.add(InitializerWithParam<P>(param, init));
+    _isolateInitializers.add(InitializerWithParam<PP>(param, init));
   }
 
-  static RunnerFactory global = RunnerFactory();
+  static WorkhorseFactory global = WorkhorseFactory();
 
-  RunnerService create([void configure(RunnerBuilder builder)]) {
+  WorkhorseService<P, R> create([void configure(RunnerBuilder builder)]) {
     final builder = RunnerBuilder._();
     _isolateInitializers.forEach((i) {
       builder.addIsolateInitializer(i.init, i.param);
@@ -221,6 +220,16 @@ class RunnerFactory {
 
     configure?.call(builder);
 
-    return RunnerService(builder, spawnRunner(builder));
+    return WorkhorseService<P, R>(builder, spawnRunner(builder));
   }
+}
+
+class WorkhorseKey<P, R> {
+  const WorkhorseKey();
+}
+
+/// A worker that's dedicated to doing a certain type of job
+abstract class Workhorse<P, R> {
+  FutureOr<R> run(job, P params, {Duration timeout, FutureOr<R> Function() onTimeout});
+  FutureOr close();
 }

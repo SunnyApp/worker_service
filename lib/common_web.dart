@@ -1,6 +1,6 @@
 class RunnerInvocation {
   final int id;
-  final Function function;
+  final function;
   final dynamic argument;
 
   RunnerInvocation(this.id, this.function, this.argument);

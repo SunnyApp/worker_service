@@ -26,8 +26,8 @@ extension RunnerExtension on Runner {
   }
 }
 
-Future<Runner> spawnRunner(RunnerBuilder builder) async {
-  final spawner = () => spawnSingleRunner(builder);
+Future<Workhorse> spawnRunner(RunnerBuilder builder) async {
+  final spawner = () => _spawnSingleRunner(builder);
   Runner result;
   if (builder.poolSize == 1) {
     /// Create a single runner
@@ -41,14 +41,19 @@ Future<Runner> spawnRunner(RunnerBuilder builder) async {
   if (builder.autoclose) {
     result.closeWhenParentIsolateExits().ignore();
   }
-  return result;
+  return IsolateWorkhorse(result);
 }
 
-Stream<dynamic> getErrorsForRunner(Runner runner) {
-  if (runner is LoadBalancer) {
-    return Stream.empty();
-  } else if (runner is IsolateRunner) {
-    return runner.errors;
+Stream<dynamic> getErrorsForRunner(Workhorse workhorse) {
+  if (workhorse is IsolateWorkhorse) {
+    final runner = workhorse._wrapped;
+    if (runner is LoadBalancer) {
+      return Stream.empty();
+    } else if (runner is IsolateRunner) {
+      return runner.errors;
+    } else {
+      return Stream.empty();
+    }
   } else {
     return Stream.empty();
   }
@@ -58,34 +63,44 @@ R _ping<R>(R _) {
   return _;
 }
 
-FutureOr<bool> pingRunner(Runner runner, {Duration timeout}) async {
-  if (runner is LoadBalancer) {
-    await runner.run(_ping, true, timeout: timeout);
-    return true;
-  } else if (runner is IsolateRunner) {
-    await runner.ping(timeout: timeout);
-    return true;
+FutureOr<bool> pingRunner(Workhorse workhorse, {Duration timeout}) async {
+  if (workhorse is IsolateWorkhorse) {
+    final runner = workhorse._wrapped;
+    if (runner is LoadBalancer) {
+      await runner.run(_ping, true, timeout: timeout);
+      return true;
+    } else if (runner is IsolateRunner) {
+      await runner.ping(timeout: timeout);
+      return true;
+    } else {
+      return true;
+    }
   } else {
     return true;
   }
 }
 
-FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
-  if (runner is LoadBalancer) {
-    await runner.close();
-    return true;
-  } else if (runner is IsolateRunner) {
-    await runner.kill(timeout: timeout);
-    return true;
+FutureOr<bool> killRunner(Workhorse workhorse, {Duration timeout}) async {
+  if (workhorse is IsolateWorkhorse) {
+    final runner = workhorse._wrapped;
+    if (runner is LoadBalancer) {
+      await runner.close();
+      return true;
+    } else if (runner is IsolateRunner) {
+      await runner.kill(timeout: timeout);
+      return true;
+    } else {
+      throw 'Invalid isolate type: ${runner.runtimeType}';
+    }
   } else {
-    throw 'Invalid isolate type: ${runner.runtimeType}';
+    return true;
   }
 }
 
 /// Creates a single [IsolateRunner]
 ///
 /// This code was copied from the `isolate` library, to allow for injecting initialization and tear down.
-Future<IsolateRunner> spawnSingleRunner(RunnerBuilder factory) async {
+Future<Runner> _spawnSingleRunner(RunnerBuilder factory) async {
   var channel = SingleResponseChannel();
   var isolate = await Isolate.spawn(_create, channel.port, debugName: factory.debugName);
 
@@ -142,3 +157,22 @@ Future _initializeIsolateRunner(RunnerBuilder builder, IsolateRunner target) asy
     rethrow;
   }
 }
+
+class IsolateWorkhorse<P, R> implements Workhorse<P, R> {
+  final Runner _wrapped;
+
+  IsolateWorkhorse(this._wrapped);
+
+  @override
+  FutureOr close() {
+    return _wrapped.close();
+  }
+
+  @override
+  FutureOr<R> run(job, P params, {Duration timeout, FutureOr<R> Function() onTimeout}) {
+    final fn = job as TopLevelFunction<P, R>;
+    return _wrapped.run<R, P>(fn, params, timeout: timeout, onTimeout: onTimeout);
+  }
+}
+
+typedef TopLevelFunction<P, R> = FutureOr<R> Function(P params);

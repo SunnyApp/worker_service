@@ -7,8 +7,8 @@ import 'isolate_test_inits.dart';
 void main() {
   group("all", () {
     setUpAll(() {
-      RunnerFactory.global.onIsolateCreated(globalOuter);
-      RunnerFactory.global.addIsolateInitializer(addLog, "global-inner:");
+      WorkhorseFactory.global.onIsolateCreated(globalOuter);
+      WorkhorseFactory.global.addIsolateInitializer(addLog, "global-inner:");
     });
 
     setUp(() {
@@ -16,7 +16,7 @@ void main() {
     });
 
     test("Killing parent isolate autocloses all children", () async {
-      final parent = await RunnerFactory.global
+      final parent = await WorkhorseFactory.global
           .create((_) => _
             ..debugName = 'parentIsolate'
             ..poolSize = 1
