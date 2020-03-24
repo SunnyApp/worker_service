@@ -10,7 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   isolate: ^2.0.3
-  pedantic: ^1.8.0+1
+  service_worker: ^0.2.3
+  sunny_dart: ^0.5.5
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,5 @@
-import 'dart:isolate';
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sunny_dart/sunny_dart.dart';
 import 'package:worker_service/worker_service.dart';
 
 import 'isolate_test_inits.dart';
@@ -8,7 +7,6 @@ import 'isolate_test_inits.dart';
 void main() {
   group("all", () {
     setUpAll(() {
-      final import = Isolate.current;
       RunnerFactory.global.onIsolateCreated(globalOuter);
       RunnerFactory.global.addIsolateInitializer(addLog, "global-inner:");
     });
@@ -31,7 +29,7 @@ void main() {
         print('##############################################################');
         print("$error");
         print('##############################################################');
-      }).ignored();
+      }).ignore();
 
       // Verify parent logs
       final parentLogs = await parent.run(getLogs, null);
@@ -60,9 +58,7 @@ void main() {
       await parent.close();
       await Future.delayed(Duration(milliseconds: 100));
       final parentPing2 = await parent.ping();
-      expect(parentPing2, equals(false),
-          reason:
-              "After killing the parent isolate, a ping to the parent should fail");
+      expect(parentPing2, equals(false), reason: "After killing the parent isolate, a ping to the parent should fail");
     });
 
     test("Initializers run", () async {

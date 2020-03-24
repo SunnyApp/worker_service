@@ -4,12 +4,12 @@ import 'package:isolate/isolate_runner.dart';
 import 'package:isolate/runner.dart';
 import 'package:worker_service/worker_service.dart';
 
-globalOuter(Runner runner) async {
+Future globalOuter(Runner runner) async {
   final _runner = runner as IsolateRunner;
   await addLog("global-outer: ${_runner.isolate.debugName}:");
 }
 
-factoryOuter(Runner runner) async {
+Future factoryOuter(Runner runner) async {
   final _runner = runner as IsolateRunner;
 
   await addLog('factory-outer: ${_runner.isolate.debugName}:');
@@ -38,8 +38,7 @@ Future<bool> ping(String name) async {
   return ping;
 }
 
-Future addLog(value) async =>
-    Data.logs.add("$value ${Isolate.current.debugName}");
+Future addLog(value) async => Data.logs.add("$value ${Isolate.current.debugName}");
 
 final runners = <String, RunnerService>{};
 
