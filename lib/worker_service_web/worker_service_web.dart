@@ -6,6 +6,7 @@ import 'package:worker_service/common.dart';
 
 import 'common_web.dart';
 
+/// Runs code in the calling isolate.  Basically, this offers no parallelism
 class SameIsolateRunner implements Runner {
   @override
   Future<void> close() async {}
@@ -76,7 +77,7 @@ bool get isMainIsolate {
 }
 
 Future<Runner> spawnRunner(RunnerBuilder builder) async {
-  return WebWorkerRunner();
+  return SameIsolateRunner();
 }
 
 Stream<dynamic> getErrorsForRunner(Runner runner) {
