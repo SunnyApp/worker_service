@@ -3,15 +3,55 @@ import 'dart:isolate';
 
 import 'package:isolate/isolate.dart';
 import 'package:isolate/isolate_runner.dart';
-import 'package:sunny_dart/sunny_dart.dart';
 import 'package:worker_service/common.dart';
 
-String get currentIsolateName {
-  return Isolate.current.debugName;
-}
+WorkerServicePlatform workerService() => const WorkerServiceIsolatePlatform();
 
-bool get isMainIsolate {
-  return Isolate.current.debugName == 'main';
+class WorkerServiceIsolatePlatform implements WorkerServicePlatform {
+  @override
+  String get currentIsolateName => Isolate.current.debugName;
+
+  @override
+  Stream getErrorsForRunner(Runner runner) {
+    if (runner is LoadBalancer) {
+      return Stream.empty();
+    } else if (runner is IsolateRunner) {
+      return runner.errors;
+    } else {
+      return Stream.empty();
+    }
+  }
+
+  @override
+  bool get isMainIsolate => Isolate.current.debugName == 'main';
+
+  @override
+  FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
+    if (runner is LoadBalancer) {
+      await runner.close();
+      return true;
+    } else if (runner is IsolateRunner) {
+      await runner.kill(timeout: timeout);
+      return true;
+    } else {
+      throw 'Invalid isolate type: ${runner.runtimeType}';
+    }
+  }
+
+  @override
+  FutureOr<bool> pingRunner(Runner runner, {Duration timeout}) async {
+    if (runner is LoadBalancer) {
+      await runner.run(_ping, true, timeout: timeout);
+      return true;
+    } else if (runner is IsolateRunner) {
+      await runner.ping(timeout: timeout);
+      return true;
+    } else {
+      return true;
+    }
+  }
+
+  const WorkerServiceIsolatePlatform();
 }
 
 extension RunnerExtension on Runner {
@@ -39,61 +79,27 @@ Future<Runner> spawnRunner(RunnerBuilder builder) async {
   }
 
   if (builder.autoclose) {
-    result.closeWhenParentIsolateExits().ignore();
+    result.closeWhenParentIsolateExits();
   }
   return result;
-}
-
-Stream<dynamic> getErrorsForRunner(Runner runner) {
-  if (runner is LoadBalancer) {
-    return Stream.empty();
-  } else if (runner is IsolateRunner) {
-    return runner.errors;
-  } else {
-    return Stream.empty();
-  }
 }
 
 R _ping<R>(R _) {
   return _;
 }
 
-FutureOr<bool> pingRunner(Runner runner, {Duration timeout}) async {
-  if (runner is LoadBalancer) {
-    await runner.run(_ping, true, timeout: timeout);
-    return true;
-  } else if (runner is IsolateRunner) {
-    await runner.ping(timeout: timeout);
-    return true;
-  } else {
-    return true;
-  }
-}
-
-FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
-  if (runner is LoadBalancer) {
-    await runner.close();
-    return true;
-  } else if (runner is IsolateRunner) {
-    await runner.kill(timeout: timeout);
-    return true;
-  } else {
-    throw 'Invalid isolate type: ${runner.runtimeType}';
-  }
-}
-
 /// Creates a single [IsolateRunner]
 ///
 /// This code was copied from the `isolate` library, to allow for injecting initialization and tear down.
 Future<IsolateRunner> spawnSingleRunner(RunnerBuilder factory) async {
-  var channel = SingleResponseChannel();
-  var isolate = await Isolate.spawn(_create, channel.port);
+  var initialPortGetter = SingleResponseChannel();
+  var isolate = await Isolate.spawn(_create, initialPortGetter.port);
 
   // Whether an uncaught exception should kill the isolate
   isolate.setErrorsFatal(factory.failOnError);
   var pingChannel = SingleResponseChannel();
   isolate.ping(pingChannel.port);
-  var commandPort = (await channel.result as SendPort);
+  var commandPort = (await initialPortGetter.result as SendPort);
   var result = IsolateRunner(isolate, commandPort);
 
   try {

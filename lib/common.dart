@@ -2,9 +2,26 @@ import 'dart:async';
 
 import 'package:isolate/load_balancer.dart';
 import 'package:isolate/runner.dart';
-import 'package:worker_service/worker_service.dart';
+
+import 'work/work.dart';
+import 'worker_service_interface.dart'
+    if (dart.library.io) 'worker_service_isolate.dart'
+    if (dart.library.js) 'worker_service_web/worker_service_web.dart';
 
 typedef IsolateFunction<P, R> = FutureOr<R> Function(R input);
+
+/// Represents the abstraction between platforms
+abstract class WorkerServicePlatform {
+  Stream<dynamic> getErrorsForRunner(Runner runner);
+
+  FutureOr<bool> pingRunner(Runner runner, {Duration timeout});
+
+  FutureOr<bool> killRunner(Runner runner, {Duration timeout});
+
+  String get currentIsolateName;
+
+  bool get isMainIsolate;
+}
 
 /// Backed by a [LoadBalancer] isolate pool.
 class RunnerBuilder {
@@ -57,7 +74,8 @@ class RunnerBuilder {
   }
 
   /// Adds an initializer - this is run on each isolate that's spawned, and contains any common setup.
-  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init, [P param]) {
+  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init,
+      [P param]) {
     assert(init != null);
     isolateInitializers.add(InitializerWithParam<P>(param, init));
   }
@@ -65,6 +83,7 @@ class RunnerBuilder {
 
 /// Wraps a [Runner] and ensures that it's spawned before executing any operations
 class RunnerService implements Runner {
+  static final platform = workerService();
   FutureOr<Runner> _runner;
   final RunnerBuilder builder;
 
@@ -105,7 +124,7 @@ class RunnerService implements Runner {
 
   Stream<dynamic> get errors async* {
     final runner = await _runner;
-    final stream = getErrorsForRunner(runner);
+    final stream = platform.getErrorsForRunner(runner);
 
     await for (final e in stream) {
       yield e;
@@ -113,17 +132,25 @@ class RunnerService implements Runner {
   }
 
   var i = 0;
+
+  Future<Work> submit<ParamType>(String key, ParamType params) async {
+    return null;
+  }
+
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {String name, Duration timeout, FutureOr<R> onTimeout(), bool ignoreShutdown = false}) async {
+      {String name,
+      Duration timeout,
+      FutureOr<R> onTimeout(),
+      bool ignoreShutdown = false}) async {
     try {
       final runner = await _runner;
       if (isShuttingDown && ignoreShutdown != true) {
         throw '$debugName: This service is shutting down';
       }
-      final res = await Future.sync(
-              () => runner.run(function, argument, timeout: timeout ?? defaultTimeout, onTimeout: onTimeout))
-          .catchError((err) {
+      final res = await Future.sync(() => runner.run(function, argument,
+          timeout: timeout ?? defaultTimeout,
+          onTimeout: onTimeout)).catchError((err) {
         print("${name ?? 'unknown'}: isolate: $err");
       });
 
@@ -135,13 +162,13 @@ class RunnerService implements Runner {
 
   Future kill([Duration timeout = const Duration(seconds: 1)]) async {
     final runner = await _runner;
-    _shutdownFuture = Future.value(killRunner(runner));
+    _shutdownFuture = Future.value(platform.killRunner(runner));
     return _shutdownFuture;
   }
 
   Future<bool> ping([Duration duration = const Duration(seconds: 1)]) async {
     if (isShuttingDown) return false;
-    return pingRunner(await _runner);
+    return platform.pingRunner(await _runner);
   }
 
   Future<RunnerService> ready() async {
@@ -156,7 +183,8 @@ class RunnerService implements Runner {
 }
 
 /// This should be implemented by the platform
-Future initializeRunner(RunnerBuilder builder, Runner target) async => throw 'not implemented for this platform';
+Future initializeRunner(RunnerBuilder builder, Runner target) async =>
+    throw 'not implemented for this platform';
 
 /// Produces IsolateRunner instances, including any initialization to the isolate(s) created.
 typedef IsolateRunnerFactory = Future<Runner> Function();
@@ -192,6 +220,8 @@ class InitializerWithParam<P> {
 class RunnerFactory {
   final _onIsolateCreated = <IsolateInitializer>[];
   final _isolateInitializers = <InitializerWithParam>[];
+
+  List<InitializerWithParam> get isolateInitializers => _isolateInitializers;
 
   /// Adds an initializer - this consumes the [IsolateRunner] and performs some action on it
   void onIsolateCreated(

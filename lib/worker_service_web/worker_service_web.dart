@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:html';
+import 'dart:html' as web;
 
 import 'package:isolate/runner.dart';
 import 'package:worker_service/common.dart';
@@ -22,7 +22,7 @@ int workerCounter = 1;
 
 class WebWorkerRunner implements Runner {
   final StreamController _errors = StreamController.broadcast();
-  final Worker worker;
+  final web.Worker worker;
   final Map<int, Completer> jobs = {};
 
   int jobId = 1;
@@ -30,7 +30,7 @@ class WebWorkerRunner implements Runner {
 
   WebWorkerRunner()
       : workerNumber = ++workerCounter,
-        worker = Worker("worker/web_worker.js") {
+        worker = web.Worker("worker/web_worker.js") {
     // Listen to Worker's postMessage().
     // dart.html convert the callback to a Stream.
     worker.onMessage.listen((msg) {
@@ -44,7 +44,7 @@ class WebWorkerRunner implements Runner {
         _errors.add(response.error);
         completer.completeError(response.error);
       }
-    });
+    }, cancelOnError: false, onError: (err) {});
   }
 
   @override
@@ -68,37 +68,44 @@ class WebWorkerRunner implements Runner {
   }
 }
 
-String get currentIsolateName {
-  return 'webMain';
-}
+WorkerServicePlatform workerService() => const WebWorkerServicePlatform();
 
-bool get isMainIsolate {
-  return true;
+class WebWorkerServicePlatform implements WorkerServicePlatform {
+  const WebWorkerServicePlatform();
+
+  @override
+  Stream<dynamic> getErrorsForRunner(Runner runner) {
+    if (runner is WebWorkerRunner) {
+      return runner.errors;
+    } else {
+      return Stream.empty();
+    }
+  }
+
+  @override
+  FutureOr<bool> pingRunner(Runner runner, {Duration timeout}) async {
+    final result = await runner.run(_ping, null);
+    return result;
+  }
+
+  @override
+  FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
+    if (runner is WebWorkerRunner) {
+      await runner.close();
+      return true;
+    }
+    return true;
+  }
+
+  @override
+  String get currentIsolateName => 'webMain';
+
+  @override
+  bool get isMainIsolate => true;
 }
 
 Future<Runner> spawnRunner(RunnerBuilder builder) async {
   return SameIsolateRunner();
-}
-
-Stream<dynamic> getErrorsForRunner(Runner runner) {
-  if (runner is WebWorkerRunner) {
-    return runner.errors;
-  } else {
-    return Stream.empty();
-  }
-}
-
-FutureOr<bool> pingRunner(Runner runner, {Duration timeout}) async {
-  final result = await runner.run(_ping, null);
-  return result;
-}
-
-FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
-  if (runner is WebWorkerRunner) {
-    await runner.close();
-    return true;
-  }
-  return true;
 }
 
 bool _ping(_) {
