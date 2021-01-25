@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:recase/recase.dart';
-
 // import 'package:flutter_degen/flutter_degen.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:worker_service/work/annotations.dart';

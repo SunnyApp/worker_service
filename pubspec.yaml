@@ -8,11 +8,12 @@ environment:
 
 dependencies:
   equatable: ^1.2.5
-  logging_config: ^0.4.7
   isolate: ^2.0.3
+  js: ^0.6.2
   logging: ^0.11.4
+  logging_config: ^0.4.7
   service_worker: ^0.2.4
-  sunny_dart: ^0.6.0+1
+  sunny_dart: ^0.6.0+4
 dependency_overrides:
   sunny_dart:
     path: ../sunny_dart

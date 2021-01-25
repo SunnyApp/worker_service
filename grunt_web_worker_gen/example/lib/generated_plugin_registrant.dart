@@ -2,8 +2,7 @@
 // Generated file. Do not edit.
 //
 
-// ignore: unused_import
-import 'dart:ui';
+// ignore_for_file: lines_longer_than_80_chars
 
 import 'package:file_picker/src/file_picker_web.dart';
 import 'package:firebase_auth_web/firebase_auth_web.dart';
@@ -18,15 +17,15 @@ import 'package:wakelock_web/wakelock_web.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
-void registerPlugins(PluginRegistry registry) {
-  FilePickerWeb.registerWith(registry.registrarFor(FilePickerWeb));
-  FirebaseAuthWeb.registerWith(registry.registrarFor(FirebaseAuthWeb));
-  FirebaseCoreWeb.registerWith(registry.registrarFor(FirebaseCoreWeb));
-  FirebaseStorageWeb.registerWith(registry.registrarFor(FirebaseStorageWeb));
-  FlutterKeyboardVisibilityPlugin.registerWith(registry.registrarFor(FlutterKeyboardVisibilityPlugin));
-  ImportJsLibrary.registerWith(registry.registrarFor(ImportJsLibrary));
-  UrlLauncherPlugin.registerWith(registry.registrarFor(UrlLauncherPlugin));
-  VideoPlayerPlugin.registerWith(registry.registrarFor(VideoPlayerPlugin));
-  WakelockWeb.registerWith(registry.registrarFor(WakelockWeb));
-  registry.registerMessageHandler();
+void registerPlugins(Registrar registrar) {
+  FilePickerWeb.registerWith(registrar);
+  FirebaseAuthWeb.registerWith(registrar);
+  FirebaseCoreWeb.registerWith(registrar);
+  FirebaseStorageWeb.registerWith(registrar);
+  FlutterKeyboardVisibilityPlugin.registerWith(registrar);
+  ImportJsLibrary.registerWith(registrar);
+  UrlLauncherPlugin.registerWith(registrar);
+  VideoPlayerPlugin.registerWith(registrar);
+  WakelockWeb.registerWith(registrar);
+  registrar.registerMessageHandler();
 }

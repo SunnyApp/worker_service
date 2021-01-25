@@ -29,7 +29,8 @@ dependency_overrides:
 
   worker_service:
     path: ../../
-
+  reliveit:
+    path: ../../../sunny_entities/reliveit
   contact_v2:
     path: ../../../sunny_entities/contact_v2
   fluro:
@@ -38,9 +39,7 @@ dependency_overrides:
     path: ../../../meta_forms
   sunny_main:
     path: ../../../sunny_entities/sunny_main
-  relive_it:
-    path: ../../../sunny_entities/relive_it
-  floor_generator: ^0.17.0
+  floor_generator: ^0.18.0
   full_text_search:
     path: ../../../full_text_search
   #  observable_collections:
@@ -76,7 +75,7 @@ dependency_overrides:
 
 dev_dependencies:
   build_config: ^0.4.5
-  build_runner: ^1.10.9
+  build_runner: ^1.10.13
 #  build_web_compilers: ^2.16.0
 
 flutter:
