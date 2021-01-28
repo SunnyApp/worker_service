@@ -15,10 +15,6 @@
 *.iws
 .idea/
 
-
-**/example/lib/ancient_task.grunt.dart.js
-**/example/lib/ancient_task.grunt.dart.js.map
-**/example/lib/ancient_task.grunt.dart.js.tar.gz
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
@@ -33,6 +29,7 @@
 .pub-cache/
 .pub/
 build/
+fastlane/report.xml
 
 # Android related
 **/android/**/gradle-wrapper.jar
@@ -77,4 +74,5 @@ build/
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+lcov.info
 coverage
