@@ -33,8 +33,8 @@ dependency_overrides:
     path: ../../../sunny_entities/reliveit
   contact_v2:
     path: ../../../sunny_entities/contact_v2
-  fluro:
-    path: ../../../fluro
+  sunny_fluro:
+    path: ../../../sunny_fluro
   meta_forms:
     path: ../../../meta_forms
   sunny_main:
