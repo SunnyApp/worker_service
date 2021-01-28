@@ -1,3 +1,8 @@
+## [0.5.2+1]
+ * Added release notes
+Added fastlane
+Updated grunt_web_worker
+
 ## [0.4.7]
 
 * Error handling

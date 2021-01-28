@@ -624,7 +624,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.5.2"
+    version: "0.5.2+1"
   yaml:
     dependency: transitive
     description:
