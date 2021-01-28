@@ -9,14 +9,14 @@ dependencies:
   analyzer: ^0.41.2
   build: ^1.6.1
   build_config: ^0.4.5
-  build_runner: ^1.10.13
-  build_web_compilers: ^2.16.0
+  build_runner: ^1.11.0
+  build_web_compilers: ^2.16.1
   flutter_degen: any
   logging: ^0.11.4
   pedantic: ^1.9.2
   recase: ^3.0.1
   source_gen: ^0.9.10+1
-  uri: ^0.11.3+1
+  uri: ^0.11.4
   worker_service: any
 dev_dependencies:
   test: ^1.15.7
