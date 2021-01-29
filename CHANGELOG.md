@@ -1,3 +1,6 @@
+## [0.5.2+3]
+ * Updated dependencies
+
 ## [0.5.2+1]
  * Added release notes
 Added fastlane
