@@ -1,3 +1,7 @@
+## [0.6.2+4]
+ * Updated Gemfile
+Updating to 2.0.x
+
 ## [0.5.2+3]
  * Updated dependencies
 
