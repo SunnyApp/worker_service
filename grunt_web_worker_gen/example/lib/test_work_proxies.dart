@@ -62,6 +62,7 @@ class _TestWorkProxiesState extends State<TestWorkProxies> {
                     RaisedButton(
                         onPressed: () async {
                           var supervisor =
+                              // ignore: missing_required_param
                               await Supervisor.create(AncientTask());
                           // supervisor.start(AncientParams(
                           //     delayInMillis: 1234 * (pow(10, i++).toInt())));
