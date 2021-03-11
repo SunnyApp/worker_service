@@ -1,3 +1,7 @@
+## [0.7.2+5]
+ * Bump minor
+Null safety
+
 ## [0.6.2+4]
  * Updated Gemfile
 Updating to 2.0.x
