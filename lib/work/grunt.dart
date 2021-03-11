@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:sunny_dart/helpers.dart';
@@ -9,20 +10,20 @@ import 'grunt_registry.dart';
 import 'message.dart';
 import 'work.dart';
 
-WorkPhase workPhaseOf(int i) {
+WorkPhase? workPhaseOf(int? i) {
   return WorkPhase.values
-      .firstWhere((element) => element.ordinal == i, orElse: () => null);
+      .firstWhereOrNull((element) => element.ordinal == i);
 }
 
 class ErrorStack {
-  final Object error;
-  final StackTrace stack;
+  final Object? error;
+  final StackTrace? stack;
 
   ErrorStack(this.error, [this.stack]);
 
   const ErrorStack.of({
-    @required this.error,
-    @required this.stack,
+    required this.error,
+    required this.stack,
   });
 
   factory ErrorStack.fromJson(map) {
@@ -95,10 +96,10 @@ extension GruntExt on Grunt {
 mixin GruntMixin<SELF extends Grunt> implements Grunt, GruntFactory<SELF> {
   PayloadHandler get fallbackEncoding => PayloadHandler.defaults;
 
-  PayloadHandler _encoding;
+  PayloadHandler? _encoding;
 
-  GruntChannel _channel;
-  Logger _log;
+  GruntChannel? _channel;
+  Logger? _log;
 
   @override
   Logger get log => _log ??= Logger("$runtimeType");
@@ -109,14 +110,14 @@ mixin GruntMixin<SELF extends Grunt> implements Grunt, GruntFactory<SELF> {
   @override
   WorkPhase workPhase = WorkPhase.ready;
 
-  double total;
+  double? total;
   double progress = 0.0;
 
   dynamic params;
-  ErrorStack error;
+  ErrorStack? error;
 
-  String message;
-  Map<String, dynamic> state;
+  String? message;
+  Map<String, dynamic>? state;
 
   @override
   void initialize(GruntChannel channel, [params]) {
@@ -131,7 +132,7 @@ mixin GruntMixin<SELF extends Grunt> implements Grunt, GruntFactory<SELF> {
 
   Future execute(dynamic params);
 
-  FutureOr onError(ErrorStack err) {}
+  FutureOr onError(ErrorStack? err) {}
 
   FutureOr onStop() {}
 
@@ -151,7 +152,7 @@ mixin GruntMixin<SELF extends Grunt> implements Grunt, GruntFactory<SELF> {
     return next(payload);
   }
 
-  dynamic decodePayload(int contentType, dynamic content, PayloadDecoder next) {
+  dynamic decodePayload(int? contentType, dynamic content, PayloadDecoder next) {
     return next(contentType, content);
   }
 
@@ -181,7 +182,7 @@ mixin GruntMixin<SELF extends Grunt> implements Grunt, GruntFactory<SELF> {
   }
 
   void sendUpdate(
-      {String message, double progress, Map<String, dynamic> state}) {
+      {String? message, double? progress, Map<String, dynamic>? state}) {
     if (message != null) {
       this.message = message;
     }

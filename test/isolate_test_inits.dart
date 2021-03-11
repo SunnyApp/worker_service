@@ -19,14 +19,14 @@ class Data {
   static final logs = <String>[];
 }
 
-Future<List<String>> getLogs(String name) async {
+Future<List<String>> getLogs(String? name) async {
   if (name == null) {
     return Data.logs;
   } else {
     if (!runners.containsKey(name)) {
       throw "Missing runner: $name";
     }
-    return await runners[name].run(getLogs, null);
+    return await runners[name]!.run(getLogs, null);
   }
 }
 
@@ -34,7 +34,7 @@ Future<bool> ping(String name) async {
   if (!runners.containsKey(name)) {
     throw "Missing runner: $name";
   }
-  final ping = await runners[name].ping();
+  final ping = await runners[name]!.ping();
   return ping;
 }
 

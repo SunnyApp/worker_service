@@ -23,11 +23,11 @@ class Supervisor<G extends Grunt> with LoggingMixin {
   WorkStatus _status = const WorkStatus.ready();
   final _ready = SafeCompleter();
 
-  StreamSubscription _sub;
+  StreamSubscription? _sub;
   final _ctrl = StreamController<WorkStatus>.broadcast();
 
   static Future<Supervisor> create<G extends Grunt>(GruntFactory<G> entry,
-      {bool debug = false, @required bool isProduction}) async {
+      {bool debug = false, required bool isProduction}) async {
     return debug == true
         ? Supervisor.debug(entry)
         : Supervisor(
@@ -45,7 +45,7 @@ class Supervisor<G extends Grunt> with LoggingMixin {
     return supervisor;
   }
 
-  Supervisor({@required this.gruntType, @required this.grunt}) {
+  Supervisor({required this.gruntType, required this.grunt}) {
     _sub = grunt.inbound.listen((DecodedMessage event) {
       log.info("Supervisor got update: ${event.messageCode}");
       switch (event.messageCode) {
@@ -72,17 +72,17 @@ class Supervisor<G extends Grunt> with LoggingMixin {
 
   WorkStatus get status => _status;
 
-  String get jobId => status?.jobId;
+  String? get jobId => status?.jobId;
 
   Future waitFor(WorkPhase t,
-      {Duration timeout, FutureOr<WorkStatus> onTimeout()}) async {
+      {Duration? timeout, FutureOr<WorkStatus> onTimeout()?}) async {
     try {
       if (_status.phase < t) {
         log.warning(
             'We are still in ${_status.phase} phase - waiting for $t${timeout == null ? '' : ' (timeout ${timeout.inMilliseconds}'}');
         return _ctrl.stream
             .firstWhere((element) => element.phase >= t)
-            .maybeTimeout(timeout, onTimeout);
+            .maybeTimeout(timeout, onTimeout!);
       } else {
         log.warning(
             'We are at ${_status.phase} phase - good enough to move on to for $t');
@@ -94,7 +94,7 @@ class Supervisor<G extends Grunt> with LoggingMixin {
     }
   }
 
-  Future start({params, Duration timeout}) async {
+  Future start({params, Duration? timeout}) async {
     await waitFor(WorkPhase.initializing, timeout: timeout);
     grunt.send(SupervisorMessages.kStart, params);
   }

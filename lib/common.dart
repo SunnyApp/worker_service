@@ -14,11 +14,11 @@ typedef IsolateFunction<P, R> = FutureOr<R> Function(R input);
 abstract class WorkerServicePlatform {
   Stream<dynamic> getErrorsForRunner(Runner runner);
 
-  FutureOr<bool> pingRunner(Runner runner, {Duration timeout});
+  FutureOr<bool> pingRunner(Runner runner, {Duration? timeout});
 
-  FutureOr<bool> killRunner(Runner runner, {Duration timeout});
+  FutureOr<bool> killRunner(Runner runner, {Duration? timeout});
 
-  String get currentIsolateName;
+  String? get currentIsolateName;
 
   bool get isMainIsolate;
 }
@@ -30,22 +30,22 @@ class RunnerBuilder {
   /// Whether this isolate or pool should fail when an error is encountered.
   bool failOnError = false;
 
-  Duration defaultTimeout = Duration(seconds: 30);
+  Duration? defaultTimeout = Duration(seconds: 30);
 
-  String get debugNameBase => _debugName;
+  String? get debugNameBase => _debugName;
 
   void withoutTimeout() {
     defaultTimeout = null;
   }
 
   /// What to name the isolate that gets created.  If using a pool, an integer will be appended to each isolate that's created
-  String _debugName;
+  String? _debugName;
 
-  set debugName(String name) {
+  set debugName(String? name) {
     _debugName = name;
   }
 
-  String get debugName {
+  String? get debugName {
     if (_debugName == null) return null;
     if (poolSize > 1) {
       return '$_debugName: ${_spawnCount++}';
@@ -74,10 +74,10 @@ class RunnerBuilder {
   }
 
   /// Adds an initializer - this is run on each isolate that's spawned, and contains any common setup.
-  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P> init,
-      [P param]) {
+  void addIsolateInitializer<P>(RunInsideIsolateInitializer<P?> init,
+      [P? param]) {
     assert(init != null);
-    isolateInitializers.add(InitializerWithParam<P>(param, init));
+    isolateInitializers.add(InitializerWithParam<P?>(param, init));
   }
 }
 
@@ -87,7 +87,7 @@ class RunnerService implements Runner {
   FutureOr<Runner> _runner;
   final RunnerBuilder builder;
 
-  Duration get defaultTimeout => builder.defaultTimeout;
+  Duration? get defaultTimeout => builder.defaultTimeout;
 
   RunnerService(
     this.builder,
@@ -101,7 +101,7 @@ class RunnerService implements Runner {
 
   String get debugName => builder.debugNameBase ?? "unnamedIsolate";
 
-  Future _shutdownFuture;
+  Future? _shutdownFuture;
 
   @override
   Future close() async {
@@ -133,15 +133,15 @@ class RunnerService implements Runner {
 
   var i = 0;
 
-  Future<Work> submit<ParamType>(String key, ParamType params) async {
+  Future<Work?> submit<ParamType>(String key, ParamType params) async {
     return null;
   }
 
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {String name,
-      Duration timeout,
-      FutureOr<R> onTimeout(),
+      {String? name,
+      Duration? timeout,
+      FutureOr<R> onTimeout()?,
       bool ignoreShutdown = false}) async {
     try {
       final runner = await _runner;
@@ -149,8 +149,8 @@ class RunnerService implements Runner {
         throw '$debugName: This service is shutting down';
       }
       final res = await Future.sync(() => runner.run(function, argument,
-          timeout: timeout ?? defaultTimeout,
-          onTimeout: onTimeout)).catchError((err) {
+          timeout: timeout ?? defaultTimeout!,
+          onTimeout: onTimeout!)).catchError((err) {
         print("${name ?? 'unknown'}: isolate: $err");
       });
 
@@ -160,7 +160,7 @@ class RunnerService implements Runner {
     }
   }
 
-  Future kill([Duration timeout = const Duration(seconds: 1)]) async {
+  Future? kill([Duration timeout = const Duration(seconds: 1)]) async {
     final runner = await _runner;
     _shutdownFuture = Future.value(platform.killRunner(runner));
     return _shutdownFuture;
@@ -239,7 +239,7 @@ class RunnerFactory {
 
   static RunnerFactory global = RunnerFactory();
 
-  RunnerService create([void configure(RunnerBuilder builder)]) {
+  RunnerService create([void configure(RunnerBuilder builder)?]) {
     final builder = RunnerBuilder._();
     _isolateInitializers.forEach((i) {
       builder.addIsolateInitializer(i.init, i.param);

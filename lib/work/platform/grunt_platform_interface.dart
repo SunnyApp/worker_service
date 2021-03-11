@@ -11,7 +11,7 @@ import '../grunt_registry.dart';
 ///   grl parameter that points to the URL of the grunt dart file
 /// * kDebug=false loads the full executable javascript file X.grunt.lib.dart.js
 Future<DuplexChannel> createGruntChannel(GruntFactory factory,
-        {@required bool isProduction}) =>
+        {required bool isProduction}) =>
     throw "Not implemented";
 DuplexChannel connectToSupervisor(GruntFactory factory) =>
     throw "Not implemented";

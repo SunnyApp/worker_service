@@ -1,6 +1,6 @@
 class RunnerInvocation {
   final int id;
-  final Function function;
+  final Function? function;
   final dynamic argument;
 
   RunnerInvocation(this.id, this.function, this.argument);
@@ -8,7 +8,7 @@ class RunnerInvocation {
   factory RunnerInvocation.ofEventData(data) {
     if (data is RunnerInvocation) return data;
     return RunnerInvocation((data["id"] as num).toInt(),
-        data["function"] as Function, data["argument"]);
+        data["function"] as Function?, data["argument"]);
   }
 }
 

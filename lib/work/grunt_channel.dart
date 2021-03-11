@@ -29,7 +29,7 @@ abstract class DuplexChannel {
   PayloadHandler get encoding;
   Stream<DecodedMessage> get inbound;
 
-  void send(int type, [dynamic payload, int contentType]);
+  void send(int type, [dynamic payload, int? contentType]);
 
   void close();
 
@@ -65,7 +65,7 @@ class _InMemoryDuplexChannel implements DuplexChannel {
   Stream<DecodedMessage> get inbound => _inbound.stream;
 
   @override
-  void send(int type, [dynamic payload, int contentType]) {
+  void send(int type, [dynamic payload, int? contentType]) {
     try {
       final _payload = encoding.encode(Payload(contentType, payload));
       _outboundRaw.add([type, _payload.header, _payload.data]);
@@ -77,11 +77,11 @@ class _InMemoryDuplexChannel implements DuplexChannel {
 }
 
 class GruntChannel with LoggingMixin {
-  final DuplexChannel boss;
+  final DuplexChannel? boss;
   final SafeCompleter _done = SafeCompleter();
   final SafeCompleter _ready = SafeCompleter();
-  final Grunt grunt;
-  StreamSubscription _sub;
+  final Grunt? grunt;
+  StreamSubscription? _sub;
 
   factory GruntChannel.create(GruntFactory factory) {
     return GruntChannel(
@@ -94,7 +94,7 @@ class GruntChannel with LoggingMixin {
     this.boss,
     this.grunt,
   }) {
-    _sub = boss.inbound.listen(
+    _sub = boss!.inbound.listen(
         (decodedMessage) {
           try {
             print("Got message from boss man!");
@@ -102,15 +102,15 @@ class GruntChannel with LoggingMixin {
 
             switch (decodedMessage.messageCode) {
               case SupervisorMessages.kInitialize:
-                grunt.initialize(this);
+                grunt!.initialize(this);
                 break;
               case SupervisorMessages.kStart:
                 log.info("Got a start message");
-                grunt.start(decodedMessage.payload);
+                grunt!.start(decodedMessage.payload);
                 break;
               case SupervisorMessages.kStop:
                 log.info("Got a stop message");
-                grunt.stop();
+                grunt!.stop();
                 break;
               case SupervisorMessages.kAck:
                 log.info("Got an ack message!");
@@ -132,13 +132,13 @@ class GruntChannel with LoggingMixin {
         });
 
     startupPing();
-    grunt.initialize(this);
+    grunt!.initialize(this);
   }
 
   Future startupPing() async {
     if (_ready.isNotComplete) {
       log.info("Sending boss our channel init message");
-      boss.send(GruntMessages.kReady);
+      boss!.send(GruntMessages.kReady);
       await Future.delayed(Duration(milliseconds: 500), startupPing);
     } else {
       log.info("Boss got our ready message");
@@ -147,7 +147,7 @@ class GruntChannel with LoggingMixin {
 
   void close() {
     _sub?.cancel();
-    boss.close();
+    boss!.close();
     _done.complete();
   }
 
@@ -156,7 +156,7 @@ class GruntChannel with LoggingMixin {
   }
 
   void updateStatus(WorkStatus status) {
-    boss.send(GruntMessages.kStatusUpdate, status.toJson(), Payload.kjson);
+    boss!.send(GruntMessages.kStatusUpdate, status.toJson(), Payload.kjson);
     if (status.phase == WorkPhase.error || status.phase == WorkPhase.stopped) {
       this.close();
     }

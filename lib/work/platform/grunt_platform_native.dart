@@ -28,7 +28,7 @@ Future _initializeGrunt(SendPort supervisorSendPort) async {
     supervisorSendPort.send(rp.sendPort);
 
     var fn = (await gruntFn as Function);
-    var grunt = fn() as Grunt;
+    var grunt = fn() as Grunt?;
     GruntChannel(
         boss: IsolateDuplexChannel(
             () => _emitter.stream
@@ -44,7 +44,7 @@ Future _initializeGrunt(SendPort supervisorSendPort) async {
 }
 
 Future<DuplexChannel> createGruntChannel(GruntFactory factory,
-    {@required bool isProduction}) async {
+    {required bool isProduction}) async {
   var _inbound = StreamController.broadcast();
   var port = RawReceivePort(_inbound.add);
 
@@ -70,7 +70,7 @@ final _super = Logger("super");
 class IsolateDuplexChannel implements DuplexChannel {
   final Getter<Stream> _inbound;
   SendPort sendPort;
-  final Isolate isolate;
+  final Isolate? isolate;
   final Logger log;
   IsolateDuplexChannel(
     this._inbound,
@@ -88,7 +88,7 @@ class IsolateDuplexChannel implements DuplexChannel {
       _inbound().map((_) => DecodedMessage.decoded(_, encoding));
 
   @override
-  void send(int type, [dynamic payload, int contentType]) {
+  void send(int type, [dynamic payload, int? contentType]) {
     log.info("Sending message $type with payload $payload to the other side");
     final _payload = encoding.encode(Payload(contentType, payload));
     sendPort.send([

@@ -57,7 +57,7 @@ class WWDuplexChannel extends DuplexChannel with LoggingMixin {
   Stream<DecodedMessage> get inbound => _inbound.stream;
 
   @override
-  void send(int type, [dynamic payload, int contentType]) {
+  void send(int type, [dynamic payload, int? contentType]) {
     try {
       log.info("Sending message $type with payload $payload to the other side");
       final _payload = encoding.encode(Payload(contentType, payload));
@@ -88,14 +88,14 @@ class WebDuplexChannel with LoggingMixin implements DuplexChannel {
 
   final _inbound = StreamController<DecodedMessage>.broadcast();
 
-  WebDuplexChannel(this.worker, this.encoding, {@required this.debugLabel}) {
+  WebDuplexChannel(this.worker, this.encoding, {required this.debugLabel}) {
     worker.onMessage.forEach((element) {
       _inbound.add(DecodedMessage.decoded(element.data, encoding));
     });
   }
 
   @override
-  void send(int type, [dynamic payload, int contentType]) {
+  void send(int type, [dynamic payload, int? contentType]) {
     log.info("Sending message $type with payload $payload to the other side");
     final _payload = encoding.encode(Payload(contentType, payload));
     worker.postMessage([

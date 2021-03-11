@@ -15,7 +15,7 @@ typedef GruntFactoryFn<G extends Grunt> = G Function();
 
 abstract class GruntFactory<G extends Grunt> {
   String get key;
-  String get package;
+  String? get package;
   GruntFactoryFn<G> get create;
 
   /// The encoding you use for this type of operation
@@ -23,7 +23,7 @@ abstract class GruntFactory<G extends Grunt> {
 
   const GruntFactory();
   const factory GruntFactory.of(String key, GruntFactoryFn<G> create,
-      [String package]) = _GruntFactory;
+      [String? package]) = _GruntFactory;
 }
 
 extension GruntFactoryRegister on GruntFactory {
@@ -40,7 +40,7 @@ class _GruntFactory<G extends Grunt> extends GruntFactory<G> {
   final String key;
 
   @override
-  final String package;
+  final String? package;
 
   const _GruntFactory(this.key, this.create, [this.package])
       : assert(key != null),

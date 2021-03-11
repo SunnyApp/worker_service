@@ -9,7 +9,7 @@ WorkerServicePlatform workerService() => const WorkerServiceIsolatePlatform();
 
 class WorkerServiceIsolatePlatform implements WorkerServicePlatform {
   @override
-  String get currentIsolateName => Isolate.current.debugName;
+  String? get currentIsolateName => Isolate.current.debugName;
 
   @override
   Stream getErrorsForRunner(Runner runner) {
@@ -26,12 +26,12 @@ class WorkerServiceIsolatePlatform implements WorkerServicePlatform {
   bool get isMainIsolate => Isolate.current.debugName == 'main';
 
   @override
-  FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
+  FutureOr<bool> killRunner(Runner runner, {Duration? timeout}) async {
     if (runner is LoadBalancer) {
       await runner.close();
       return true;
     } else if (runner is IsolateRunner) {
-      await runner.kill(timeout: timeout);
+      await runner.kill(timeout: timeout!);
       return true;
     } else {
       throw 'Invalid isolate type: ${runner.runtimeType}';
@@ -39,12 +39,12 @@ class WorkerServiceIsolatePlatform implements WorkerServicePlatform {
   }
 
   @override
-  FutureOr<bool> pingRunner(Runner runner, {Duration timeout}) async {
+  FutureOr<bool> pingRunner(Runner runner, {Duration? timeout}) async {
     if (runner is LoadBalancer) {
-      await runner.run(_ping, true, timeout: timeout);
+      await runner.run(_ping, true, timeout: timeout!);
       return true;
     } else if (runner is IsolateRunner) {
-      await runner.ping(timeout: timeout);
+      await runner.ping(timeout: timeout!);
       return true;
     } else {
       return true;
@@ -117,7 +117,7 @@ Future<IsolateRunner> spawnSingleRunner(RunnerBuilder factory) async {
     final shutdownResponse = SingleResponseChannel(callback: (_) {
       print(
           '############  SHUTDOWN ${factory.debugNameBase}  ##################');
-    });
+    } as FutureOr<Null> Function(Null));
     Isolate.current.addOnExitListener(commandPort,
         response: [_SHUTDOWN, shutdownResponse.port]);
   }

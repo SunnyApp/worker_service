@@ -13,7 +13,7 @@ class SameIsolateRunner implements Runner {
 
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {Duration timeout, FutureOr<R> Function() onTimeout}) {
+      {Duration? timeout, FutureOr<R> Function()? onTimeout}) {
     return Future.value(function(argument));
   }
 }
@@ -58,7 +58,7 @@ class WebWorkerRunner implements Runner {
 
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {Duration timeout, FutureOr<R> Function() onTimeout}) {
+      {Duration? timeout, FutureOr<R> Function()? onTimeout}) {
     final _id = ++jobId;
     final invocation = RunnerInvocation(_id, function, argument);
     final completer = Completer<R>();
@@ -83,13 +83,13 @@ class WebWorkerServicePlatform implements WorkerServicePlatform {
   }
 
   @override
-  FutureOr<bool> pingRunner(Runner runner, {Duration timeout}) async {
+  FutureOr<bool> pingRunner(Runner runner, {Duration? timeout}) async {
     final result = await runner.run(_ping, null);
     return result;
   }
 
   @override
-  FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
+  FutureOr<bool> killRunner(Runner runner, {Duration? timeout}) async {
     if (runner is WebWorkerRunner) {
       await runner.close();
       return true;
