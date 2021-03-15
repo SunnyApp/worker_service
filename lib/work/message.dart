@@ -63,7 +63,7 @@ abstract class PayloadHandler {
 }
 
 Payload _encodeRaw(Payload payload) => payload;
-dynamic _decodeRaw(int type, payload) => payload;
+dynamic _decodeRaw(int? type, payload) => payload;
 
 Payload _encodeJson(Payload payload) {
   if (payload.header == Payload.kraw) {
@@ -75,7 +75,7 @@ Payload _encodeJson(Payload payload) {
 
 final _log = Logger("json");
 
-dynamic _decodeJson(int type, inbound) {
+dynamic _decodeJson(int? type, inbound) {
   if (inbound is String) {
     return json.decode(inbound);
   } else {

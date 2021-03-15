@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:isolate/isolate.dart';
-import 'package:isolate/isolate_runner.dart';
+import 'package:logging_config/logging_config.dart';
+import 'package:logging_config/logging_environment.dart';
 import 'package:worker_service/common.dart';
 
 WorkerServicePlatform workerService() => const WorkerServiceIsolatePlatform();
@@ -114,7 +114,8 @@ Future<IsolateRunner> spawnSingleRunner(RunnerBuilder factory) async {
 
   if (factory.autoclose) {
     // I tried using my own channel for this
-    final shutdownResponse = SingleResponseChannel(callback: (_) {
+    final shutdownResponse = SingleResponseChannel(
+        callback: (_) {
       print(
           '############  SHUTDOWN ${factory.debugNameBase}  ##################');
     } as FutureOr<Null> Function(Null));
@@ -150,4 +151,26 @@ Future _initializeIsolateRunner(
     print(e);
     rethrow;
   }
+}
+
+IsolateLoggingEnvironment workerLogEnvironment() {
+  return const IsolateLoggingEnvironment();
+}
+
+class IsolateLoggingEnvironment implements LoggingEnvironment {
+  const IsolateLoggingEnvironment();
+
+  @override
+  String get envName => "${Isolate.current.debugName ?? 'main'}";
+
+  @override
+  void onLogConfig(LogConfig logConfig) {
+    RunnerFactory.global
+        .addIsolateInitializer(_configureLoggingIsolate, logConfig);
+  }
+}
+
+/// Required to have a top-level global function to pass to the isolate
+FutureOr _configureLoggingIsolate(final dynamic p) async {
+  if (p is LogConfig) return await configureLogging(p);
 }

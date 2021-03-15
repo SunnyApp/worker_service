@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 
 import 'grunt.dart';
 
@@ -19,23 +18,19 @@ extension WorkPhaseVerify on WorkPhase? {
   }
 
   bool operator >(WorkPhase a) {
-    assert(a != null || this != null);
-    return this.ordinal > a.ordinal;
+    return this!.ordinal > a.ordinal;
   }
 
   bool operator <(WorkPhase a) {
-    assert(a != null || this != null);
-    return this.ordinal < a.ordinal;
+    return this!.ordinal < a.ordinal;
   }
 
   bool operator >=(WorkPhase a) {
-    assert(a != null || this != null);
-    return this.ordinal >= a.ordinal;
+    return this!.ordinal >= a.ordinal;
   }
 
   bool operator <=(WorkPhase a) {
-    assert(a != null || this != null);
-    return this.ordinal <= a.ordinal;
+    return this!.ordinal <= a.ordinal;
   }
 
   bool get isStopped {
@@ -133,7 +128,7 @@ class WorkStatus extends Equatable {
     );
   }
 
-  factory WorkStatus.fromJson(json) {
+  static WorkStatus? fromJson(json) {
     if (json == null) return null;
     return WorkStatus(
       jobId: json['jobId'] as String?,

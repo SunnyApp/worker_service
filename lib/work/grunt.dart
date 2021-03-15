@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
 import 'package:sunny_dart/helpers.dart';
 
 import 'grunt_channel.dart';
@@ -11,8 +10,7 @@ import 'message.dart';
 import 'work.dart';
 
 WorkPhase? workPhaseOf(int? i) {
-  return WorkPhase.values
-      .firstWhereOrNull((element) => element.ordinal == i);
+  return WorkPhase.values.firstWhereOrNull((element) => element.ordinal == i);
 }
 
 class ErrorStack {
@@ -26,11 +24,11 @@ class ErrorStack {
     required this.stack,
   });
 
-  factory ErrorStack.fromJson(map) {
+  static ErrorStack? fromJson(map) {
     if (map == null) return null;
     return ErrorStack.of(
       error: map['error']?.toString(),
-      stack: StackTrace.fromString(map['stack']?.toString()),
+      stack: StackTrace.fromString(map['stack']?.toString() ?? ''),
     );
   }
 
@@ -152,7 +150,8 @@ mixin GruntMixin<SELF extends Grunt> implements Grunt, GruntFactory<SELF> {
     return next(payload);
   }
 
-  dynamic decodePayload(int? contentType, dynamic content, PayloadDecoder next) {
+  dynamic decodePayload(
+      int? contentType, dynamic content, PayloadDecoder next) {
     return next(contentType, content);
   }
 

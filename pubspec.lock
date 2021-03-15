@@ -8,6 +8,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.5.0"
+  boolean_selector:
+    dependency: transitive
+    description:
+      name: boolean_selector
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.0"
   characters:
     dependency: transitive
     description:
@@ -15,6 +22,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  charcode:
+    dependency: transitive
+    description:
+      name: charcode
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   chunked_stream:
     dependency: transitive
     description:
@@ -50,8 +64,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  fake_async:
+    dependency: transitive
+    description:
+      name: fake_async
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   flutter:
     dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
+  flutter_test:
+    dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -72,9 +98,11 @@ packages:
   isolate:
     dependency: "direct main"
     description:
-      name: isolate
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: f961c1ca4a5efbfd324cd02495eaa505eb031ad5
+      url: "https://github.com/2ZeroSix/isolate"
+    source: git
     version: "2.0.3"
   js:
     dependency: "direct main"
@@ -89,7 +117,7 @@ packages:
       name: libphonenumber2
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2+1"
+    version: "2.0.2+2"
   logging:
     dependency: "direct main"
     description:
@@ -103,7 +131,7 @@ packages:
       name: logging_config
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.7+2"
+    version: "0.6.7+5"
   matcher:
     dependency: transitive
     description:
@@ -160,18 +188,18 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.0-nullsafety.0"
-  service_worker:
-    dependency: "direct main"
-    description:
-      name: service_worker
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.4"
   sky_engine:
     dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.99"
+  source_span:
+    dependency: transitive
+    description:
+      name: source_span
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.8.0"
   stack_trace:
     dependency: transitive
     description:
@@ -179,6 +207,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.10.0"
+  stream_channel:
+    dependency: transitive
+    description:
+      name: stream_channel
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.0"
   stream_transform:
     dependency: transitive
     description:
@@ -186,13 +221,34 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  string_scanner:
+    dependency: transitive
+    description:
+      name: string_scanner
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.0"
   sunny_dart:
     dependency: "direct main"
     description:
       name: sunny_dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.0+6"
+    version: "0.8.0+7"
+  term_glyph:
+    dependency: transitive
+    description:
+      name: term_glyph
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
+  test_api:
+    dependency: transitive
+    description:
+      name: test_api
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.19"
   timezone:
     dependency: transitive
     description:

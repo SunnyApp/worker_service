@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:html' as web;
 
-import 'package:isolate/runner.dart';
+import 'package:logging_config/logging_config.dart';
+import 'package:logging_config/logging_environment.dart';
 import 'package:worker_service/common.dart';
 
+import '../runner.dart';
 import 'common_web.dart';
 
 /// Runs code in the calling isolate.  Basically, this offers no parallelism
@@ -41,8 +43,11 @@ class WebWorkerRunner implements Runner {
       } else if (response.isSuccess) {
         completer.complete(response.result);
       } else {
-        _errors.add(response.error);
-        completer.completeError(response.error);
+        final error = response.error;
+        _errors.add(error);
+        if (error is Object) {
+          completer.completeError(error);
+        }
       }
     }, cancelOnError: false, onError: (err) {});
   }
@@ -110,4 +115,17 @@ Future<Runner> spawnRunner(RunnerBuilder builder) async {
 
 bool _ping(_) {
   return true;
+}
+
+WebWorkerLoggingEnvironment workerLogEnvironment() =>
+    const WebWorkerLoggingEnvironment();
+
+class WebWorkerLoggingEnvironment implements LoggingEnvironment {
+  const WebWorkerLoggingEnvironment();
+
+  @override
+  String get envName => "web-worker";
+
+  @override
+  void onLogConfig(LogConfig logConfig) {}
 }

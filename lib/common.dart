@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:isolate/load_balancer.dart';
-import 'package:isolate/runner.dart';
-
+import 'runner.dart';
 import 'work/work.dart';
 import 'worker_service_interface.dart'
     if (dart.library.io) 'worker_service_isolate.dart'
