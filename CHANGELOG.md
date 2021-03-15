@@ -1,3 +1,6 @@
+## [0.7.2+10]
+ * bundle update
+
 ## [0.7.2+8]
  * Moving to different isolates fork
 
