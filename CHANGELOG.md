@@ -1,3 +1,6 @@
+## [0.7.2+8]
+ * Moving to different isolates fork
+
 ## [0.7.2+5]
  * Bump minor
 Null safety

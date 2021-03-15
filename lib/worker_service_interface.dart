@@ -1,7 +1,8 @@
 import 'dart:async';
 
+import 'package:isolates/runner.dart';
+import 'package:isolates/runner_factory.dart';
 import 'package:logging_config/logging_environment.dart';
-import 'package:worker_service/runner.dart';
 import 'common.dart';
 
 WorkerServicePlatform workerService() =>

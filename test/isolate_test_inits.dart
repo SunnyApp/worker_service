@@ -1,7 +1,6 @@
 import 'dart:isolate';
 
-import 'package:isolate/isolate_runner.dart';
-import 'package:isolate/runner.dart';
+import 'package:isolates/isolates.dart';
 import 'package:worker_service/worker_service.dart';
 
 Future globalOuter(Runner runner) async {
@@ -38,18 +37,21 @@ Future<bool> ping(String name) async {
   return ping;
 }
 
-Future addLog(value) async => Data.logs.add("$value ${Isolate.current.debugName}");
+Future addLog(value) async =>
+    Data.logs.add("$value ${Isolate.current.debugName}");
 
 final runners = <String, RunnerService>{};
 
-Future testInnerProcess(String debugName) async {
+Future testInnerProcess(String debugName, [int poolSize = 3]) async {
   final pool = RunnerFactory.global.create((_) => _
     ..debugName = debugName
-    ..poolSize = 3
+    ..poolSize = poolSize
     ..defaultTimeout = Duration(seconds: 2)
-    ..addIsolateInitializer(addLog, "factory-inner:")
+
+    /// Tell the isolate to write a log as soon as it starts
+    ..addIsolateInitializerWithParam(addLog, "factory-inner:")
     ..addOnIsolateCreated(factoryOuter)
-    ..autoclose = true);
+    ..autoCloseChildren = true);
   await pool.ready();
   runners[debugName] = pool;
 }

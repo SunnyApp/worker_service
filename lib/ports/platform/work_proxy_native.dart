@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:html' as web;
 import 'dart:isolate';
 import 'package:async/async.dart';
-import 'package:isolate/isolate.dart';
+import 'package:isolates/isolates.dart';
 import 'package:sunny_dart/helpers.dart';
 import 'package:worker_service/ports/isolate_entry.dart';
 import 'package:worker_service/ports/ports.dart';
@@ -58,10 +58,9 @@ class WorkProxyIsolate extends WorkIsolate {
   final Isolate worker;
   final ReceivePort2 rcp;
 
-  WorkProxyIsolate({required this.worker, required this.rcp, bool errorsAreFatal = true})
-      : assert(worker != null),
-        assert(errorsAreFatal != null),
-        super(rcp.sendPort);
+  WorkProxyIsolate(
+      {required this.worker, required this.rcp, bool errorsAreFatal = true})
+      : super(rcp.sendPort);
 
   @override
   void addErrorListener(SendPort2 port) {

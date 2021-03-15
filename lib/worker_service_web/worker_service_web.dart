@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:html' as web;
 
+import 'package:isolates/isolates.dart';
+import 'package:isolates/runner_factory.dart';
 import 'package:logging_config/logging_config.dart';
 import 'package:logging_config/logging_environment.dart';
 import 'package:worker_service/common.dart';
 
-import '../runner.dart';
 import 'common_web.dart';
 
 /// Runs code in the calling isolate.  Basically, this offers no parallelism

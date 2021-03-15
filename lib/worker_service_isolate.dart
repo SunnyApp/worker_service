@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:isolates/isolates.dart';
+import 'package:isolates/runner_factory.dart';
 import 'package:logging_config/logging_config.dart';
 import 'package:logging_config/logging_environment.dart';
 import 'package:worker_service/common.dart';
@@ -26,12 +28,13 @@ class WorkerServiceIsolatePlatform implements WorkerServicePlatform {
   bool get isMainIsolate => Isolate.current.debugName == 'main';
 
   @override
-  FutureOr<bool> killRunner(Runner runner, {Duration? timeout}) async {
+  FutureOr<bool> killRunner(Runner runner,
+      {Duration timeout = const Duration(seconds: 1)}) async {
     if (runner is LoadBalancer) {
       await runner.close();
       return true;
     } else if (runner is IsolateRunner) {
-      await runner.kill(timeout: timeout!);
+      await runner.kill(timeout: timeout);
       return true;
     } else {
       throw 'Invalid isolate type: ${runner.runtimeType}';
@@ -39,12 +42,13 @@ class WorkerServiceIsolatePlatform implements WorkerServicePlatform {
   }
 
   @override
-  FutureOr<bool> pingRunner(Runner runner, {Duration? timeout}) async {
+  FutureOr<bool> pingRunner(Runner runner,
+      {Duration timeout = const Duration(seconds: 1)}) async {
     if (runner is LoadBalancer) {
-      await runner.run(_ping, true, timeout: timeout!);
+      await runner.run(_ping, true, timeout: timeout);
       return true;
     } else if (runner is IsolateRunner) {
-      await runner.ping(timeout: timeout!);
+      await runner.ping(timeout: timeout);
       return true;
     } else {
       return true;
@@ -67,7 +71,7 @@ extension RunnerExtension on Runner {
 }
 
 Future<Runner> spawnRunner(RunnerBuilder builder) async {
-  final spawner = () => spawnSingleRunner(builder);
+  final spawner = () => IsolateRunner.build(builder);
   Runner result;
   if (builder.poolSize == 1) {
     /// Create a single runner
@@ -78,7 +82,7 @@ Future<Runner> spawnRunner(RunnerBuilder builder) async {
     throw 'Invalid runner configuration.  Pool size must be at least 1';
   }
 
-  if (builder.autoclose) {
+  if (builder.autoCloseChildren) {
     result.closeWhenParentIsolateExits();
   }
   return result;
@@ -88,70 +92,44 @@ R _ping<R>(R _) {
   return _;
 }
 
-/// Creates a single [IsolateRunner]
-///
-/// This code was copied from the `isolate` library, to allow for injecting initialization and tear down.
-Future<IsolateRunner> spawnSingleRunner(RunnerBuilder factory) async {
-  var initialPortGetter = SingleResponseChannel();
-  var isolate = await Isolate.spawn(_create, initialPortGetter.port);
-
-  // Whether an uncaught exception should kill the isolate
-  isolate.setErrorsFatal(factory.failOnError);
-  var pingChannel = SingleResponseChannel();
-  isolate.ping(pingChannel.port);
-  var commandPort = (await initialPortGetter.result as SendPort);
-  var result = IsolateRunner(isolate, commandPort);
-
-  try {
-    await _initializeIsolateRunner(factory, result);
-  } catch (e, stack) {
-    print(stack);
-    await result.close();
-    rethrow;
-  }
-  // Guarantees that setErrorsFatal has completed.
-  await pingChannel.result;
-
-  if (factory.autoclose) {
-    // I tried using my own channel for this
-    final shutdownResponse = SingleResponseChannel(
-        callback: (_) {
-      print(
-          '############  SHUTDOWN ${factory.debugNameBase}  ##################');
-    } as FutureOr<Null> Function(Null));
-    Isolate.current.addOnExitListener(commandPort,
-        response: [_SHUTDOWN, shutdownResponse.port]);
-  }
-
-  return result;
-}
-
-const _SHUTDOWN = 0;
-
-/// This code is run inside the isolate when it's first created.
-///
-/// Copied from `isolate` library
-void _create(Object data) {
-  var initPort = data as SendPort;
-  var remote = IsolateRunnerRemote();
-  initPort.send(remote.commandPort);
-}
-
-Future _initializeIsolateRunner(
-    RunnerBuilder builder, IsolateRunner target) async {
-  try {
-    for (final onCreate in builder.onIsolateCreated) {
-      await onCreate(target);
-    }
-
-    for (final init in builder.isolateInitializers) {
-      await target.run(init.init, init.param);
-    }
-  } catch (e) {
-    print(e);
-    rethrow;
-  }
-}
+// /// Creates a single [IsolateRunner]
+// ///
+// /// This code was copied from the `isolate` library, to allow for injecting initialization and tear down.
+// Future<IsolateRunner> spawnSingleRunner(RunnerBuilder factory) async {
+//   var initialPortGetter = SingleResponseChannel();
+//   var isolate = await Isolate.spawn(_create, initialPortGetter.port,
+//       debugName: factory.debugName);
+//
+//   // Whether an uncaught exception should kill the isolate
+//   isolate.setErrorsFatal(factory.failOnError);
+//   var pingChannel = SingleResponseChannel();
+//   isolate.ping(pingChannel.port);
+//   var commandPort = (await initialPortGetter.result as SendPort);
+//   var result = IsolateRunner(isolate, commandPort);
+//
+//   try {
+//     await _initializeIsolateRunner(factory, result);
+//   } catch (e, stack) {
+//     print(stack);
+//     await result.close();
+//     rethrow;
+//   }
+//
+//   // Guarantees that setErrorsFatal has completed.
+//   await pingChannel.result;
+//
+//   if (factory.autoclose) {
+//     // I tried using my own channel for this
+//     final shutdownResponse = SingleResponseChannel(callback: (_) {
+//       print(
+//           '############  SHUTDOWN ${factory.debugNameBase}  ##################');
+//     });
+//     Isolate.current.addOnExitListener(commandPort,
+//         response: [_SHUTDOWN, shutdownResponse.port]);
+//   }
+//
+//   return result;
+// }
 
 IsolateLoggingEnvironment workerLogEnvironment() {
   return const IsolateLoggingEnvironment();
@@ -166,7 +144,7 @@ class IsolateLoggingEnvironment implements LoggingEnvironment {
   @override
   void onLogConfig(LogConfig logConfig) {
     RunnerFactory.global
-        .addIsolateInitializer(_configureLoggingIsolate, logConfig);
+        .addIsolateInitializerParam(_configureLoggingIsolate, logConfig);
   }
 }
 
