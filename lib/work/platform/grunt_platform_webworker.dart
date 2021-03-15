@@ -7,7 +7,6 @@ import 'dart:html';
 
 import 'package:js/js.dart';
 import 'package:sunny_dart/helpers/logging_mixin.dart';
-import 'package:meta/meta.dart';
 import 'package:worker_service/work/grunt_channel.dart';
 
 import '../message.dart';
@@ -36,7 +35,7 @@ class WWDuplexChannel extends DuplexChannel with LoggingMixin {
     onMessage = allowInterop((event) {
       try {
         if (event is MessageEvent) {
-          print("Message into ww ${event?.data}");
+          print("Message into ww ${event.data}");
           _inbound.add(DecodedMessage.decoded(event.data, encoding));
           print("Send message to stream...");
         } else {

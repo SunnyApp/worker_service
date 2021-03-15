@@ -50,7 +50,6 @@ class AncientTask with GruntMixin<AncientTask> {
     sendUpdate(message: "Completed!");
   }
 
-  @override
   AncientParams parseParams(p) => AncientParams.fromJson(p);
 
   @override

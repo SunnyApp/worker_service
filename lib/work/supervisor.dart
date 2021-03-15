@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:sunny_dart/extensions.dart';
 import 'package:sunny_dart/helpers.dart';
 
@@ -72,7 +71,7 @@ class Supervisor<G extends Grunt> with LoggingMixin {
 
   WorkStatus get status => _status;
 
-  String? get jobId => status?.jobId;
+  String? get jobId => status.jobId;
 
   Future waitFor(WorkPhase t,
       {Duration? timeout, FutureOr<WorkStatus> onTimeout()?}) async {

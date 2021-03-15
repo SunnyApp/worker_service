@@ -1,11 +1,7 @@
 // ignore_for_file: always_require_non_null_named_parameters
 
 import 'dart:async';
-import 'dart:html' as web;
 import 'dart:isolate';
-import 'package:async/async.dart';
-import 'package:isolates/isolates.dart';
-import 'package:sunny_dart/helpers.dart';
 import 'package:worker_service/ports/isolate_entry.dart';
 import 'package:worker_service/ports/ports.dart';
 import 'package:worker_service/ports/ports_shared.dart';

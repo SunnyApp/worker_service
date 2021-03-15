@@ -7,7 +7,6 @@ import 'message.dart';
 var _gruntRegistry = _GruntRegistry._();
 _GruntRegistry get gruntRegistry => _gruntRegistry;
 set gruntRegistry(_GruntRegistry registry) {
-  assert(registry != null);
   _gruntRegistry = registry;
 }
 
@@ -42,10 +41,7 @@ class _GruntFactory<G extends Grunt> extends GruntFactory<G> {
   @override
   final String? package;
 
-  const _GruntFactory(this.key, this.create, [this.package])
-      : assert(key != null),
-        assert(create != null),
-        super();
+  const _GruntFactory(this.key, this.create, [this.package]) : super();
 }
 
 class _GruntRegistry with LoggingMixin {
@@ -54,9 +50,7 @@ class _GruntRegistry with LoggingMixin {
   final _factories = <String, GruntFactory>{};
 
   _GruntRegistry operator +(GruntFactory factory) {
-    assert(factory != null);
     final key = factory.key;
-    assert(key != null);
     if (_factories.containsKey(key)) {
       log.warning("Grunt key already exists!: $key");
     }

@@ -7,7 +7,7 @@ environment:
 dependencies: 
   async: ^2.5.0
   equatable: ^2.0.0
-  isolates: ^3.0.3+4
+  isolates: ^3.0.3+7
   js: ^0.6.3
   logging: ^1.0.0
   logging_config: ^0.6.7+6

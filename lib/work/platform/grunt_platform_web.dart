@@ -1,15 +1,12 @@
 import 'dart:html' as web;
 
 import 'package:worker_service/work/grunt_channel.dart';
-import 'package:meta/meta.dart';
 import 'package:worker_service/work/grunt_registry.dart';
 import 'package:worker_service/work/platform/grunt_platform_webworker.dart';
 // import 'package:flutter/foundation.dart' show kDebugMode;
 
-
 Future<DuplexChannel> createGruntChannel(GruntFactory fn,
     {required bool isProduction}) async {
-
   var fullPath = "";
   final package = fn.package;
   final path = fn.key;

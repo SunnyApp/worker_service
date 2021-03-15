@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 import '../grunt_channel.dart';
 import '../grunt_registry.dart';
 

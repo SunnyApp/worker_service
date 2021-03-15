@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:html' as web;
-import 'package:async/async.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sunny_dart/helpers.dart';
 import 'package:worker_service/ports/isolate_entry.dart';
@@ -62,9 +61,7 @@ class IsolateWeb extends WorkIsolate {
     required this.worker,
     this.errorsAreFatal = true,
     this.debugName,
-  })  : assert(worker != null),
-        assert(errorsAreFatal != null),
-        super(WebWorkerSendPort(worker));
+  }) : super(WebWorkerSendPort(worker));
 
   @override
   void addErrorListener(SendPort2 port) {
@@ -87,7 +84,7 @@ class IsolateWeb extends WorkIsolate {
       _isActive = false;
 
       worker.terminate();
-      _exitLx?.forEach((key, value) {
+      _exitLx.forEach((key, value) {
         key.send(value);
       });
     }

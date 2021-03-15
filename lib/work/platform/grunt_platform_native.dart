@@ -3,7 +3,6 @@ import 'dart:isolate';
 
 import 'package:logging/logging.dart';
 import 'package:logging_config/logging_config.dart';
-import 'package:meta/meta.dart';
 import 'package:sunny_dart/helpers.dart';
 import 'package:sunny_dart/typedefs.dart';
 

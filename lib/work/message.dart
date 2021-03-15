@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
 
 class DecodedMessage {
   final int? messageCode;
@@ -44,7 +43,7 @@ class MessageEnvelope {
   final Payload payload;
 
   MessageEnvelope(this.messageCode, [Payload payload = Payload.empty])
-      : payload = payload ?? Payload.empty;
+      : payload = payload;
 }
 
 abstract class PayloadHandler {
