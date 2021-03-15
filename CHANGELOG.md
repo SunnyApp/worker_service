@@ -1,3 +1,6 @@
+## [0.7.2+11]
+ * Updating to latest isolates
+
 ## [0.7.2+10]
  * bundle update
 
