@@ -1,3 +1,6 @@
+## [0.7.2+13]
+ * Updating sunny_dart
+
 ## [0.7.2+12]
  * Removing gemfile.lock
 version update
