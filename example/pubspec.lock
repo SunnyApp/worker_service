@@ -291,13 +291,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.4"
-  isolate:
+  isolates:
     dependency: transitive
     description:
-      name: isolate
+      name: isolates
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "3.0.3+7"
   js:
     dependency: "direct main"
     description:
@@ -332,7 +332,7 @@ packages:
       name: logging_config
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.7+2"
+    version: "0.6.7+6"
   matcher:
     dependency: transitive
     description:
@@ -466,13 +466,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.4+3"
-  service_worker:
-    dependency: transitive
-    description:
-      name: service_worker
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.4"
   shelf:
     dependency: transitive
     description:
@@ -617,7 +610,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.6.2+4"
+    version: "0.7.2+11"
   yaml:
     dependency: transitive
     description:
