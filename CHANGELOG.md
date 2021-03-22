@@ -1,3 +1,7 @@
+## [0.7.2+12]
+ * Removing gemfile.lock
+version update
+
 ## [0.7.2+11]
  * Updating to latest isolates
 
