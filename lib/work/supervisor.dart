@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:sunny_dart/extensions.dart';
-import 'package:sunny_dart/helpers.dart';
+import 'package:logging/logging.dart';
 
 import 'grunt.dart';
 import 'grunt_channel.dart';
@@ -12,7 +11,9 @@ import 'platform/grunt_platform_interface.dart'
     if (dart.library.js) 'platform/grunt_platform_web.dart';
 import 'work.dart';
 
-class Supervisor<G extends Grunt> with LoggingMixin {
+class Supervisor<G extends Grunt> {
+  static final log = Logger("supervisor");
+
   /// This is how we send and receive messages to/from the worker
   final DuplexChannel grunt;
 
@@ -20,7 +21,7 @@ class Supervisor<G extends Grunt> with LoggingMixin {
 
   /// The last status reported by the worker
   WorkStatus _status = const WorkStatus.ready();
-  final _ready = SafeCompleter();
+  final _ready = Completer();
 
   StreamSubscription? _sub;
   final _ctrl = StreamController<WorkStatus>.broadcast();
@@ -79,9 +80,14 @@ class Supervisor<G extends Grunt> with LoggingMixin {
       if (_status.phase < t) {
         log.warning(
             'We are still in ${_status.phase} phase - waiting for $t${timeout == null ? '' : ' (timeout ${timeout.inMilliseconds}'}');
-        return _ctrl.stream
-            .firstWhere((element) => element.phase >= t)
-            .maybeTimeout(timeout, onTimeout!);
+        final fw = _ctrl.stream.firstWhere((element) => element.phase >= t);
+        if (timeout == null) {
+          return fw;
+        } else if (timeout.inMicroseconds <= 0) {
+          return fw;
+        } else {
+          return fw.timeout(timeout, onTimeout: onTimeout);
+        }
       } else {
         log.warning(
             'We are at ${_status.phase} phase - good enough to move on to for $t');

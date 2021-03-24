@@ -3,9 +3,10 @@
 import 'dart:async';
 import 'dart:html' as web;
 import 'package:equatable/equatable.dart';
-import 'package:sunny_dart/helpers.dart';
 import 'package:worker_service/ports/isolate_entry.dart';
 import 'package:worker_service/ports/ports.dart';
+
+import '../../utils.dart';
 
 Future<WorkIsolate> spawnWorkProxy<T>(IsolateEntry entry, T message,
     {bool errorsAreFatal = true, String? debugName}) async {

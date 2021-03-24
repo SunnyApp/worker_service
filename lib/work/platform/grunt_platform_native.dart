@@ -3,15 +3,13 @@ import 'dart:isolate';
 
 import 'package:logging/logging.dart';
 import 'package:logging_config/logging_config.dart';
-import 'package:sunny_dart/helpers.dart';
-import 'package:sunny_dart/typedefs.dart';
 
 import '../grunt.dart';
 import '../grunt_channel.dart';
 import '../grunt_registry.dart';
 import '../message.dart';
 
-final _superLog = Logger("supervisor");
+// final _superLog = Logger("supervisor");
 final _gruntlog = Logger("grunt");
 
 Future _initializeGrunt(SendPort supervisorSendPort) async {
@@ -60,14 +58,14 @@ Future<DuplexChannel> createGruntChannel(GruntFactory factory,
 
 DuplexChannel connectToSupervisor(GruntFactory factory) {
   /// Is there anything to do?
-  return notImplemented();
+  throw Exception('Not implemented');
 }
 
 final _grunt = Logger("grunt");
 final _super = Logger("super");
 
 class IsolateDuplexChannel implements DuplexChannel {
-  final Getter<Stream> _inbound;
+  final Stream Function() _inbound;
   SendPort sendPort;
   final Isolate? isolate;
   final Logger log;

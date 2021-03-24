@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:sunny_dart/helpers.dart';
+import 'package:logging/logging.dart';
 
 import 'grunt.dart';
 import 'grunt_registry.dart';
@@ -76,10 +76,11 @@ class _InMemoryDuplexChannel implements DuplexChannel {
   }
 }
 
-class GruntChannel with LoggingMixin {
+class GruntChannel {
+  static final log = Logger("gruntChannel");
   final DuplexChannel? boss;
-  final SafeCompleter _done = SafeCompleter();
-  final SafeCompleter _ready = SafeCompleter();
+  final _done = Completer();
+  final _ready = Completer();
   final Grunt? grunt;
   StreamSubscription? _sub;
 
@@ -136,7 +137,7 @@ class GruntChannel with LoggingMixin {
   }
 
   Future startupPing() async {
-    if (_ready.isNotComplete) {
+    if (!_ready.isCompleted) {
       log.info("Sending boss our channel init message");
       boss!.send(GruntMessages.kReady);
       await Future.delayed(Duration(milliseconds: 500), startupPing);

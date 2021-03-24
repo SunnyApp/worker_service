@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:js/js.dart';
-import 'package:sunny_dart/helpers/logging_mixin.dart';
+import 'package:logging/logging.dart';
 import 'package:worker_service/work/grunt_channel.dart';
 
 import '../message.dart';
@@ -25,7 +25,8 @@ abstract class XMLHttpRequestProgressEvent implements ProgressEvent {
   }
 }
 
-class WWDuplexChannel extends DuplexChannel with LoggingMixin {
+class WWDuplexChannel extends DuplexChannel {
+  static final log = Logger("wwDuplexChannel");
   final _inbound = StreamController<DecodedMessage>.broadcast();
   @override
   final PayloadHandler encoding;
@@ -73,7 +74,9 @@ class WWDuplexChannel extends DuplexChannel with LoggingMixin {
   }
 }
 
-class WebDuplexChannel with LoggingMixin implements DuplexChannel {
+class WebDuplexChannel implements DuplexChannel {
+  static final log = Logger("webDuplexChannel");
+
   /// The actual WebWorker instance
   final Worker worker;
 
@@ -81,9 +84,6 @@ class WebDuplexChannel with LoggingMixin implements DuplexChannel {
   final PayloadHandler encoding;
 
   final String debugLabel;
-
-  @override
-  String get loggerName => debugLabel;
 
   final _inbound = StreamController<DecodedMessage>.broadcast();
 

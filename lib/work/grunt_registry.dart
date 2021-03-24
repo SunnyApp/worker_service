@@ -1,4 +1,4 @@
-import 'package:sunny_dart/helpers.dart';
+import 'package:logging/logging.dart';
 
 import 'grunt.dart';
 import 'message.dart';
@@ -44,7 +44,9 @@ class _GruntFactory<G extends Grunt> extends GruntFactory<G> {
   const _GruntFactory(this.key, this.create, [this.package]) : super();
 }
 
-class _GruntRegistry with LoggingMixin {
+class _GruntRegistry {
+  static final log = Logger("gruntRegistry");
+
   _GruntRegistry._();
 
   final _factories = <String, GruntFactory>{};
@@ -59,6 +61,7 @@ class _GruntRegistry with LoggingMixin {
   }
 
   GruntFactory operator [](String key) {
-    return _factories[key] ?? illegalState("Factory not found for key $key");
+    return _factories[key] ??
+        (throw Exception("Factory not found for key $key"));
   }
 }

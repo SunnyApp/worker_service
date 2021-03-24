@@ -4,18 +4,22 @@ homepage: https://github.com/SunnyApp/worker_service
 description: A flutter package that works for native/web, and allows the creation of workers that offload work into a potentially parallel space
 environment: 
   sdk: '>=2.12.0 <3.0.0'
-dependencies: 
+dependencies:
   async: ^2.5.0
+  collection: ^1.15.0
+  dartxx: ^0.5.0+2
   equatable: ^2.0.0
   isolates: ^3.0.3+8
   js: ^0.6.3
   logging: ^1.0.0
   logging_config: ^0.6.7+6
   meta: ^1.3.0
-  sunny_dart: ^0.9.0+1
-  collection: ^1.15.0
-dev_dependencies: 
-  flutter_test: 
+  #  sunny_dart: ^0.9.0+1
+  uuid: ^3.0.2
+dev_dependencies:
+  dartxx: ^0.5.0+2
+  pedantic: ^1.11.0
+  flutter_test:
     sdk: flutter
 flutter: 
   assets: 

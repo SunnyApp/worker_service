@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:logging/logging.dart';
-import 'package:sunny_dart/helpers.dart';
 
+import '../utils.dart';
 import 'grunt_channel.dart';
 import 'grunt_registry.dart';
 import 'message.dart';
@@ -219,6 +219,6 @@ mixin GruntMixin<SELF extends Grunt> implements Grunt, GruntFactory<SELF> {
   @override
   GruntChannel get channel =>
       _channel ??
-      illegalState(
-          "Attempting to communicate before channel has been established");
+      (throw Exception(
+          "Attempting to communicate before channel has been established"));
 }

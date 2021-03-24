@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sunny_dart/sunny_dart.dart';
 import 'package:worker_service/worker_service.dart';
 
 import 'isolate_test_inits.dart';
@@ -51,7 +50,7 @@ void main() {
         print('##############################################################');
         print("$error");
         print('##############################################################');
-      }).ignore();
+      });
 
       // Verify parent logs
       final parentLogs = await parent.run(getLogs, null);
