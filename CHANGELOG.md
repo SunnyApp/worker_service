@@ -1,3 +1,6 @@
+## [0.7.2+14]
+ * Fixing analyzer warning
+
 ## [0.7.2+13]
  * Updating sunny_dart
 
