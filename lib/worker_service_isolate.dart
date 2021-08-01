@@ -139,7 +139,11 @@ class IsolateLoggingEnvironment implements LoggingEnvironment {
   const IsolateLoggingEnvironment();
 
   @override
-  String get envName => "${Isolate.current.debugName ?? 'main'}";
+  String get envName {
+    String name = Isolate.current.debugName.toString();
+    // ignore: dead_null_aware_expression, unnecessary_null_comparison
+    return name == '' || name == null ? 'main' : name;
+  }
 
   @override
   void onLogConfig(LogConfig logConfig) {

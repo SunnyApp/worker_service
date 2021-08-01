@@ -6,7 +6,7 @@ import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:worker_service/work/annotations.dart';
 
-String fieldName(Element element) {
+String? fieldName(Element element) {
   return element.name;
 }
 

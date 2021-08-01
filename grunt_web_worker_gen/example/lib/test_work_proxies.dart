@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'dart:html';
 import 'dart:math';
 import 'dart:ui';
@@ -43,7 +44,7 @@ class _TestWorkProxiesState extends State<TestWorkProxies> {
               Container(
                 child: Row(
                   children: [
-                    RaisedButton(
+                    ElevatedButton(
                         onPressed: () async {
                           var supervisor = await Supervisor.create(
                               UploadLargeFile(),
@@ -59,7 +60,7 @@ class _TestWorkProxiesState extends State<TestWorkProxies> {
                         },
                         child: Text("Upload Large File")),
                     SizedBox(width: 15),
-                    RaisedButton(
+                    ElevatedButton(
                         onPressed: () async {
                           var supervisor =
                               // ignore: missing_required_param

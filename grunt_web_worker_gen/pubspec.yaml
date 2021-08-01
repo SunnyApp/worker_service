@@ -1,31 +1,23 @@
 name: grunt_web_worker_gen
 description: Generates web workers
-publish_to: 'none'
+version: 0.7.2+14
 
 environment:
-  sdk: ">=2.5.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  analyzer: ^0.40.4
-  build: ^1.6.1
-  build_config: ^0.4.5
-  build_runner: ^1.11.0
-  build_web_compilers: ^2.16.1
-  flutter_degen: any
-  logging: ^0.11.4
-  pedantic: ^1.9.2
-  recase: ^3.0.1
-  source_gen: ^0.9.10+1
-  uri: ^0.11.4
-  worker_service: any
+  analyzer: ^2.0.0
+  build: ^2.0.3
+  build_config: ^1.0.0
+  build_runner: ^2.0.6
+  #build_web_compilers: ^3.2.0
+  flutter_degen: ^0.6.0+4
+  logging: ^1.0.1
+  pedantic: ^1.11.1
+  recase: ^4.0.0
+  meta: ^1.7.0
+  source_gen: ^1.0.5
+  uri: ^1.0.0
+  worker_service: ^0.7.2+14
 dev_dependencies:
-  test: ^1.15.7
-
-dependency_overrides:
-  dependency_overrides:
-    sunny_dart: ^0.8.0+6
-
-  flutter_degen:
-    path: ../../flutter_degen
-  worker_service:
-    path: ../
+  test: ^1.17.10
