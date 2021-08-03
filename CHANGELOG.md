@@ -1,3 +1,7 @@
+## [0.7.2+15]
+ * analyzer warnings
+Ugpraded to 2.0
+
 ## [0.7.2+14]
  * Fixing analyzer warning
 
