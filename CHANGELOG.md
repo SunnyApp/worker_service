@@ -1,3 +1,6 @@
+## [0.7.2+16]
+ * Upgrades
+
 ## [0.7.2+15]
  * analyzer warnings
 Ugpraded to 2.0
