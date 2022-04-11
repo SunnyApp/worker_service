@@ -36,14 +36,16 @@ class WWDuplexChannel extends DuplexChannel {
     onMessage = allowInterop((event) {
       try {
         if (event is MessageEvent) {
-          print("Message into ww ${event.data}");
+          print("WebWorker received raw message: ${event.data}");
           _inbound.add(DecodedMessage.decoded(event.data, encoding));
           print("Send message to stream...");
         } else {
           print("Got non-message event: $event");
         }
       } catch (e) {
+        print("############# ERROR LISTENING TO EVENT #############");
         print(e);
+        print("#############                          #############");
       }
     });
   }
@@ -59,7 +61,7 @@ class WWDuplexChannel extends DuplexChannel {
   @override
   void send(int type, [dynamic payload, int? contentType]) {
     try {
-      log.info("Sending message $type with payload $payload to the other side");
+      log.info("Sending message $type with payload $payload to the outer control");
       final _payload = encoding.encode(Payload(contentType, payload));
       print("Message: $type with payload $payload");
       postMessage([

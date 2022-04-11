@@ -79,6 +79,7 @@ class _InMemoryDuplexChannel implements DuplexChannel {
 class GruntChannel {
   static final log = Logger("gruntChannel");
   final DuplexChannel? boss;
+  var _initCount = 0;
   final _done = Completer();
   final _ready = Completer();
   final Grunt? grunt;
@@ -98,29 +99,31 @@ class GruntChannel {
     _sub = boss!.inbound.listen(
         (decodedMessage) {
           try {
-            print("Got message from boss man!");
+            print("grunt channel got message from boss man: $decodedMessage");
             _ready.complete();
 
             switch (decodedMessage.messageCode) {
               case SupervisorMessages.kInitialize:
-                grunt!.initialize(this);
+                print("  > initialize");
+                // grunt!.initialize(this);
                 break;
               case SupervisorMessages.kStart:
-                log.info("Got a start message");
+                print("  > start");
                 grunt!.start(decodedMessage.payload);
                 break;
               case SupervisorMessages.kStop:
-                log.info("Got a stop message");
+                print("  > stop");
                 grunt!.stop();
                 break;
               case SupervisorMessages.kAck:
-                log.info("Got an ack message!");
+                print("  > ack");
                 break;
               default:
                 log.info("Invalid message: ${decodedMessage.messageCode}");
             }
-          } catch (e) {
-            log.info("ERROR!: $e");
+          } catch (e, stack) {
+            print("ERROR!: $e");
+            print(stack);
           }
         },
         cancelOnError: false,
@@ -138,8 +141,9 @@ class GruntChannel {
 
   Future startupPing() async {
     if (!_ready.isCompleted) {
-      log.info("Sending boss our channel init message");
+      log.info("Sending boss our channel init message: attempt $_initCount");
       boss!.send(GruntMessages.kReady);
+      _initCount++;
       await Future.delayed(Duration(milliseconds: 500), startupPing);
     } else {
       log.info("Boss got our ready message");
@@ -159,6 +163,7 @@ class GruntChannel {
   void updateStatus(WorkStatus status) {
     boss!.send(GruntMessages.kStatusUpdate, status.toJson(), Payload.kjson);
     if (status.phase == WorkPhase.error || status.phase == WorkPhase.stopped) {
+      print("Stopping because of an error");
       this.close();
     }
   }
