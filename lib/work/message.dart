@@ -2,11 +2,45 @@ import 'dart:convert';
 
 import 'package:logging/logging.dart';
 
+import 'grunt_channel.dart';
+
+class MessageCode {
+  final int code;
+  final String sender;
+  final String name;
+
+  const MessageCode.grunt(this.code, this.name) : sender = "grunt";
+  const MessageCode.supervisor(this.code, this.name) : sender = "supervisor";
+  const MessageCode.unknown(this.code)
+      : name = "unknown",
+        sender = "unknown";
+
+  static final _codes = [
+    ...GruntMessages.messages,
+    ...SupervisorMessages.messages,
+  ].asMap().map((key, value) => MapEntry(value.code, value));
+
+  static void registerCode(MessageCode code) {
+    _codes[code.code] = code;
+  }
+
+  static MessageCode get(int? code) {
+    return MessageCode._codes[code] ?? MessageCode.unknown(code ?? -1);
+  }
+
+  @override
+  String toString() {
+    return "from $sender: $name [code=$code]";
+  }
+}
+
 class DecodedMessage {
   final int? messageCode;
   final dynamic payload;
 
   DecodedMessage(this.messageCode, [this.payload]);
+
+  MessageCode get messageCodeInfo => MessageCode.get(this.messageCode);
 
   factory DecodedMessage.decoded(raw, PayloadHandler env) {
     assert(raw is List, "Payload must be list");
@@ -44,6 +78,8 @@ class MessageEnvelope {
 
   MessageEnvelope(this.messageCode, [Payload payload = Payload.empty])
       : payload = payload;
+
+  MessageCode get messageCodeInfo => MessageCode.get(this.messageCode);
 }
 
 abstract class PayloadHandler {
@@ -57,6 +93,10 @@ abstract class PayloadHandler {
           required PayloadEncoder encode}) =>
       _PayloadHandler(decode, encode, contentType);
 
+  /**
+   * When sending data across webworker or isolate boundaries, we need to convert
+   * messages to a more portable format
+   */
   static const defaults = _PayloadHandler(_decodeJson, _encodeJson, null);
   static const raw = _PayloadHandler(_decodeRaw, _encodeRaw, null);
 }
@@ -103,6 +143,20 @@ class Payload {
   static const int kjson = 3;
   static const int kraw = 0;
   static const int kempty = -1;
+
+  static String headerName(int code) {
+    switch (code) {
+      case 3:
+        return 'json';
+      case 0:
+        return 'raw';
+      case -1:
+        return 'empty';
+      default:
+        return 'unknown: code=$code';
+    }
+  }
+
   static const empty = Payload(kempty, null);
   final int header;
   final dynamic data;

@@ -7,6 +7,7 @@ import 'package:worker_service/work/platform/grunt_platform_webworker.dart';
 
 Future<DuplexChannel> createGruntChannel(GruntFactory fn,
     {required bool isProduction}) async {
+  print("Launching grunt channel!");
   var fullPath = "";
   final package = fn.package;
   final path = fn.key;

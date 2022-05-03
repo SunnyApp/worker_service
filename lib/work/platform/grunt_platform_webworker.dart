@@ -26,26 +26,24 @@ abstract class XMLHttpRequestProgressEvent implements ProgressEvent {
 }
 
 class WWDuplexChannel extends DuplexChannel {
-  static final log = Logger("wwDuplexChannel");
+  final Logger log;
   final _inbound = StreamController<DecodedMessage>.broadcast();
   @override
   final PayloadHandler encoding;
 
-  WWDuplexChannel(this.encoding) {
-    print("Inside web worker, setting up onmessage listener for supervisor");
+  WWDuplexChannel(this.encoding, {String? channelName})
+      : log = Logger(channelName ?? 'webworker') {
+    log.info("Inside web worker, setting up onmessage listener for supervisor");
     onMessage = allowInterop((event) {
       try {
         if (event is MessageEvent) {
-          print("WebWorker received raw message: ${event.data}");
+          log.info("WebWorker received raw message: ${event.data}");
           _inbound.add(DecodedMessage.decoded(event.data, encoding));
-          print("Send message to stream...");
         } else {
-          print("Got non-message event: $event");
+          log.warning("Got non-message event: $event");
         }
-      } catch (e) {
-        print("############# ERROR LISTENING TO EVENT #############");
-        print(e);
-        print("#############                          #############");
+      } catch (e, stack) {
+        log.severe("ERROR LISTENING TO EVENT: $e", e, stack);
       }
     });
   }
@@ -61,9 +59,10 @@ class WWDuplexChannel extends DuplexChannel {
   @override
   void send(int type, [dynamic payload, int? contentType]) {
     try {
-      log.info("Sending message $type with payload $payload to the outer control");
+      log.info(
+          "Sending message ${MessageCode.get(type)} with payload $payload to the outer control");
       final _payload = encoding.encode(Payload(contentType, payload));
-      print("Message: $type with payload $payload");
+
       postMessage([
         type,
         _payload.header,
@@ -77,7 +76,7 @@ class WWDuplexChannel extends DuplexChannel {
 }
 
 class WebDuplexChannel implements DuplexChannel {
-  static final log = Logger("webDuplexChannel");
+  final Logger log;
 
   /// The actual WebWorker instance
   final Worker worker;
@@ -89,7 +88,8 @@ class WebDuplexChannel implements DuplexChannel {
 
   final _inbound = StreamController<DecodedMessage>.broadcast();
 
-  WebDuplexChannel(this.worker, this.encoding, {required this.debugLabel}) {
+  WebDuplexChannel(this.worker, this.encoding, {required this.debugLabel})
+      : log = Logger(debugLabel) {
     worker.onMessage.forEach((element) {
       _inbound.add(DecodedMessage.decoded(element.data, encoding));
     });
@@ -97,8 +97,16 @@ class WebDuplexChannel implements DuplexChannel {
 
   @override
   void send(int type, [dynamic payload, int? contentType]) {
-    log.info("Sending message $type with payload $payload to the other side");
     final _payload = encoding.encode(Payload(contentType, payload));
+    if (payload != null) {
+      log.info(
+          "Sending message $type with original:${payload.runtimeType}: encoded as header=${_payload.header} data=${_payload.data}");
+      log.info(
+          "  > encoded as Sending message $type with payload ${payload.runtimeType}");
+    } else {
+      log.info("Sending message $type with null payload ${_payload.header}");
+    }
+
     worker.postMessage([
       type,
       _payload.header,

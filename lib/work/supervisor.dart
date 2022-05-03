@@ -12,7 +12,7 @@ import 'platform/grunt_platform_interface.dart'
 import 'work.dart';
 
 class Supervisor<G extends Grunt> {
-  static final log = Logger("supervisor");
+  static final log = Logger("<< supervisor");
 
   /// This is how we send and receive messages to/from the worker
   final DuplexChannel grunt;
@@ -47,11 +47,13 @@ class Supervisor<G extends Grunt> {
 
   Supervisor({required this.gruntType, required this.grunt}) {
     _sub = grunt.inbound.listen((DecodedMessage event) {
-      log.info("Supervisor got update: ${event.messageCode}");
+      log.info(
+          " got message from worker: ${event.messageCodeInfo}: ${event.payload?.runtimeType}");
       switch (event.messageCode) {
         case GruntMessages.kReady:
-          log.info("Got ready message!");
-          _ready.complete();
+          if (!_ready.isCompleted) {
+            _ready.complete();
+          }
           grunt.send(SupervisorMessages.kAck);
           break;
         case GruntMessages.kStatusUpdate:
@@ -60,6 +62,16 @@ class Supervisor<G extends Grunt> {
           }
           var workStatus = WorkStatus.fromJson(event.payload);
           if (workStatus != null) {
+            log.info("  * details: ${workStatus.message}");
+            if (workStatus.percentComplete != null) {
+              log.info(
+                  "  * pct: ${(workStatus.percentComplete! * 100).toInt() / 100}%");
+            }
+            if (workStatus.error != null) {
+              log.info("  * error: ${workStatus.error}");
+            }
+            log.info("  ---------------------------------");
+
             _status = _status + workStatus;
             _ctrl.add(_status);
           }

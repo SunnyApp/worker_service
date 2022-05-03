@@ -16,12 +16,23 @@ class SupervisorMessages {
   static const int kAck = 210;
   static const int kStart = 203;
   static const int kStop = 204;
+  static const messages = [
+    MessageCode.supervisor(kInitialize, "command=initialize"),
+    MessageCode.grunt(kAck, "received status"),
+    MessageCode.grunt(kStart, "command=start"),
+    MessageCode.grunt(kStop, "command=stop"),
+  ];
 }
 
 class GruntMessages {
   static const int kReady = 101;
   static const int kStatusUpdate = 102;
   static const int kError = 103;
+  static const messages = [
+    MessageCode.grunt(kReady, "ready"),
+    MessageCode.grunt(kStatusUpdate, "statusUpdate"),
+    MessageCode.grunt(kError, "an error occurred"),
+  ];
 }
 
 /// Used to communicate work status
@@ -76,6 +87,8 @@ class _InMemoryDuplexChannel implements DuplexChannel {
   }
 }
 
+/// A communications channel that lets a supervisor and grunt communicate about
+/// work that needs to be completed
 class GruntChannel {
   static final log = Logger("gruntChannel");
   final DuplexChannel? boss;
@@ -99,8 +112,10 @@ class GruntChannel {
     _sub = boss!.inbound.listen(
         (decodedMessage) {
           try {
-            print("grunt channel got message from boss man: $decodedMessage");
-            _ready.complete();
+            print("got from supervisor: ${decodedMessage.messageCodeInfo}");
+            if (decodedMessage.payload != null) {
+              print("  > payload: ${decodedMessage.payload}");
+            }
 
             switch (decodedMessage.messageCode) {
               case SupervisorMessages.kInitialize:
@@ -116,10 +131,13 @@ class GruntChannel {
                 grunt!.stop();
                 break;
               case SupervisorMessages.kAck:
+                if (!_ready.isCompleted) {
+                  _ready.complete();
+                }
                 print("  > ack");
                 break;
               default:
-                log.info("Invalid message: ${decodedMessage.messageCode}");
+                log.info("Invalid message: ${decodedMessage.messageCodeInfo}");
             }
           } catch (e, stack) {
             print("ERROR!: $e");
@@ -153,7 +171,9 @@ class GruntChannel {
   void close() {
     _sub?.cancel();
     boss!.close();
-    _done.complete();
+    if (!_done.isCompleted) {
+      _done.complete();
+    }
   }
 
   Future get done {
@@ -161,9 +181,9 @@ class GruntChannel {
   }
 
   void updateStatus(WorkStatus status) {
-    boss!.send(GruntMessages.kStatusUpdate, status.toJson(), Payload.kjson);
+    boss!.send(GruntMessages.kStatusUpdate, status.toJson(), Payload.kraw);
     if (status.phase == WorkPhase.error || status.phase == WorkPhase.stopped) {
-      print("Stopping because of an error");
+      log.warning("We should be stopped");
       this.close();
     }
   }

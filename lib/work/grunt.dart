@@ -100,7 +100,7 @@ mixin GruntMixin<SELF extends Grunt> implements Grunt, GruntFactory<SELF> {
   Logger? _log;
 
   @override
-  Logger get log => _log ??= Logger("$runtimeType");
+  Logger get log => _log ??= Logger("<< grunt:$key");
 
   @override
   final String jobId = uuid();

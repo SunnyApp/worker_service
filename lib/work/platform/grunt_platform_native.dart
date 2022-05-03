@@ -86,14 +86,14 @@ class IsolateDuplexChannel implements DuplexChannel {
 
   @override
   void send(int type, [dynamic payload, int? contentType]) {
-    log.info("Sending message $type with payload $payload to the other side");
+    // log.info("Sending message $type with payload $payload to the other side");
     final _payload = encoding.encode(Payload(contentType, payload));
     try {
       sendPort.send([
-            type,
-            _payload.header,
-            _payload.data,
-          ]);
+        type,
+        _payload.header,
+        _payload.data,
+      ]);
     } catch (e, stack) {
       log.severe("Error sending payload: $e", e, stack);
       rethrow;
