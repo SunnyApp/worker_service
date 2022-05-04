@@ -203,7 +203,7 @@ packages:
       name: dartxx
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.1+2"
+    version: "0.5.5"
   dorker:
     dependency: "direct main"
     description:
@@ -283,7 +283,7 @@ packages:
       name: inflection3
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.3+1"
+    version: "0.5.3+2"
   intl:
     dependency: transitive
     description:
@@ -472,7 +472,7 @@ packages:
       name: recase
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.0-nullsafety.0"
+    version: "4.0.0"
   scratch_space:
     dependency: transitive
     description:
@@ -624,7 +624,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.7.2+17"
+    version: "0.7.4"
   yaml:
     dependency: transitive
     description:
@@ -633,5 +633,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.14.0 <3.0.0"
+  dart: ">=2.16.0 <3.0.0"
   flutter: ">=1.12.8"

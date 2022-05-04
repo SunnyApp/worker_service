@@ -1,3 +1,11 @@
+## 0.7.4
+
+ - **FEAT**: grunt_web_worker.
+
+## 0.7.3
+
+ - **FEAT**: grunt_web_worker.
+
 ## [0.7.2+16]
  * Upgrades
 
