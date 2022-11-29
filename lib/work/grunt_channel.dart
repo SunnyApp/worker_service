@@ -117,13 +117,17 @@ class GruntChannel {
               print("  > payload: ${decodedMessage.payload}");
             }
 
+            if(!_ready.isCompleted) {
+              _ready.complete();
+            }
             switch (decodedMessage.messageCode) {
               case SupervisorMessages.kInitialize:
                 print("  > initialize");
-                // grunt!.initialize(this);
+
                 break;
               case SupervisorMessages.kStart:
                 print("  > start");
+
                 grunt!.start(decodedMessage.payload);
                 break;
               case SupervisorMessages.kStop:
@@ -131,9 +135,6 @@ class GruntChannel {
                 grunt!.stop();
                 break;
               case SupervisorMessages.kAck:
-                if (!_ready.isCompleted) {
-                  _ready.complete();
-                }
                 print("  > ack");
                 break;
               default:
