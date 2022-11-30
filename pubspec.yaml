@@ -13,11 +13,17 @@ dependencies:
   meta: ^1.8.0
   uuid: ^3.0.6
   isolates: 
-    path: /Users/ericm/sunny/trippi_plugins/isolate
+    git: 
+      url: git@github.com:SunnyApp/isolate.git
+      ref: trippi_app
   logging_config: 
-    path: /Users/ericm/sunny/trippi_plugins/logging_config
+    git: 
+      url: git@github.com:SunnyApp/logging_config
+      ref: trippi_app
   dartxx: 
-    path: /Users/ericm/sunny/trippi_plugins/dartxx
+    git: 
+      url: git@github.com:ericmartineau/dartxx.git
+      ref: trippi_app
 dev_dependencies: 
   pedantic: ^1.11.1
   flutter_test: 
