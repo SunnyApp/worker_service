@@ -5,15 +5,17 @@ description: A flutter package that works for native/web, and allows the creatio
 environment: 
   sdk: '>=2.6.0 <3.0.0'
 dependencies: 
-  async: ^2.4.2
-  equatable: ^1.2.5
+  async: ^2.9.0
+  equatable: ^2.0.5
   isolate: ^2.0.3
-  js: ^0.6.2
-  logging: ^0.11.4
-  logging_config: ^0.4.7
-  meta: ^1.2.4
+  js: ^0.6.4
+  logging: ^1.0.2
+  meta: ^1.8.0
   service_worker: ^0.2.4
-  sunny_dart: ^0.6.0+4
+  logging_config: 
+    path: /Users/ericm/reliveit/checkout/SunnyApp/logging_config
+  sunny_dart: 
+    path: /Users/ericm/reliveit/checkout/SunnyApp/sunny_dart
 flutter: 
   assets: 
     - bootstrap_dev.js
