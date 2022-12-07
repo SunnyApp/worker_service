@@ -13,7 +13,7 @@ class ProxyReceivePort extends DelegatingStream
   ProxyReceivePort() : this._(StreamController(sync: true));
 
   @override
-  void send(Object message) {
+  void send(Object? message) {
     _ctl.add(message);
   }
 

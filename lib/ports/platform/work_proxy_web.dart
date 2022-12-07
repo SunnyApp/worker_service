@@ -2,15 +2,15 @@
 
 import 'dart:async';
 import 'dart:html' as web;
-import 'package:async/async.dart';
 import 'package:equatable/equatable.dart';
-import 'package:sunny_dart/helpers.dart';
 import 'package:worker_service/ports/isolate_entry.dart';
 import 'package:worker_service/ports/ports.dart';
 
+import '../../utils.dart';
+
 Future<WorkIsolate> spawnWorkProxy<T>(IsolateEntry entry, T message,
-    {bool errorsAreFatal = true, String debugName}) async {
-  var worker = web.Worker(entry.entryFileName);
+    {bool errorsAreFatal = true, String? debugName}) async {
+  var worker = web.Worker(entry.entryFileName!);
   var isolate = IsolateWeb(
     worker: worker,
     errorsAreFatal: errorsAreFatal,
@@ -27,7 +27,7 @@ class WebWorkerSendPort extends Equatable implements SendPort2 {
   WebWorkerSendPort(this.worker) : _uuid = uuid();
 
   @override
-  void send(Object message) {
+  void send(Object? message) {
     worker.postMessage(message);
   }
 
@@ -59,12 +59,10 @@ class IsolateWeb extends WorkIsolate {
   final Map<SendPort2, Object> _exitLx = {};
 
   IsolateWeb({
-    this.worker,
+    required this.worker,
     this.errorsAreFatal = true,
     this.debugName,
-  })  : assert(worker != null),
-        assert(errorsAreFatal != null),
-        super(WebWorkerSendPort(worker));
+  }) : super(WebWorkerSendPort(worker));
 
   @override
   void addErrorListener(SendPort2 port) {
@@ -74,12 +72,12 @@ class IsolateWeb extends WorkIsolate {
   }
 
   @override
-  void addOnExitListener(SendPort2 responsePort, {Object response}) {
+  void addOnExitListener(SendPort2 responsePort, {Object? response}) {
     _exitLx[responsePort] = response ?? true;
   }
 
   @override
-  final String debugName;
+  final String? debugName;
 
   @override
   void kill({int priority = WorkIsolate.beforeNextEvent}) {
@@ -87,21 +85,21 @@ class IsolateWeb extends WorkIsolate {
       _isActive = false;
 
       worker.terminate();
-      _exitLx?.forEach((key, value) {
+      _exitLx.forEach((key, value) {
         key.send(value);
       });
     }
   }
 
   @override
-  Capability2 pause([Capability2 resumeCapability]) => throw "Not implemented";
+  Capability2 pause([Capability2? resumeCapability]) => throw "Not implemented";
 
   @override
-  Capability2 get pauseCapability => null;
+  Capability2? get pauseCapability => null;
 
   @override
   void ping(SendPort2 responsePort,
-      {Object response, int priority = WorkIsolate.immediate}) {
+      {Object? response, int priority = WorkIsolate.immediate}) {
     responsePort.send(response ?? true);
   }
 
@@ -126,7 +124,7 @@ class IsolateWeb extends WorkIsolate {
   }
 
   @override
-  Capability2 get terminateCapability => null;
+  Capability2? get terminateCapability => null;
 
   @override
   Stream get messages {

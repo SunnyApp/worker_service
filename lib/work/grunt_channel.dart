@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:sunny_dart/helpers.dart';
+import 'package:logging/logging.dart';
 
 import 'grunt.dart';
 import 'grunt_registry.dart';
@@ -16,12 +16,23 @@ class SupervisorMessages {
   static const int kAck = 210;
   static const int kStart = 203;
   static const int kStop = 204;
+  static const messages = [
+    MessageCode.supervisor(kInitialize, "command=initialize"),
+    MessageCode.grunt(kAck, "received status"),
+    MessageCode.grunt(kStart, "command=start"),
+    MessageCode.grunt(kStop, "command=stop"),
+  ];
 }
 
 class GruntMessages {
   static const int kReady = 101;
   static const int kStatusUpdate = 102;
   static const int kError = 103;
+  static const messages = [
+    MessageCode.grunt(kReady, "ready"),
+    MessageCode.grunt(kStatusUpdate, "statusUpdate"),
+    MessageCode.grunt(kError, "an error occurred"),
+  ];
 }
 
 /// Used to communicate work status
@@ -29,7 +40,7 @@ abstract class DuplexChannel {
   PayloadHandler get encoding;
   Stream<DecodedMessage> get inbound;
 
-  void send(int type, [dynamic payload, int contentType]);
+  void send(int type, [dynamic payload, int? contentType]);
 
   void close();
 
@@ -65,7 +76,7 @@ class _InMemoryDuplexChannel implements DuplexChannel {
   Stream<DecodedMessage> get inbound => _inbound.stream;
 
   @override
-  void send(int type, [dynamic payload, int contentType]) {
+  void send(int type, [dynamic payload, int? contentType]) {
     try {
       final _payload = encoding.encode(Payload(contentType, payload));
       _outboundRaw.add([type, _payload.header, _payload.data]);
@@ -76,12 +87,16 @@ class _InMemoryDuplexChannel implements DuplexChannel {
   }
 }
 
-class GruntChannel with LoggingMixin {
-  final DuplexChannel boss;
-  final SafeCompleter _done = SafeCompleter();
-  final SafeCompleter _ready = SafeCompleter();
-  final Grunt grunt;
-  StreamSubscription _sub;
+/// A communications channel that lets a supervisor and grunt communicate about
+/// work that needs to be completed
+class GruntChannel {
+  static final log = Logger("gruntChannel");
+  final DuplexChannel? boss;
+  var _initCount = 0;
+  final _done = Completer();
+  final _ready = Completer();
+  final Grunt? grunt;
+  StreamSubscription? _sub;
 
   factory GruntChannel.create(GruntFactory factory) {
     return GruntChannel(
@@ -94,32 +109,40 @@ class GruntChannel with LoggingMixin {
     this.boss,
     this.grunt,
   }) {
-    _sub = boss.inbound.listen(
+    _sub = boss!.inbound.listen(
         (decodedMessage) {
           try {
-            print("Got message from boss man!");
-            _ready.complete();
+            print("got from supervisor: ${decodedMessage.messageCodeInfo}");
+            if (decodedMessage.payload != null) {
+              print("  > payload: ${decodedMessage.payload}");
+            }
 
+            if(!_ready.isCompleted) {
+              _ready.complete();
+            }
             switch (decodedMessage.messageCode) {
               case SupervisorMessages.kInitialize:
-                grunt.initialize(this);
+                print("  > initialize");
+
                 break;
               case SupervisorMessages.kStart:
-                log.info("Got a start message");
-                grunt.start(decodedMessage.payload);
+                print("  > start");
+
+                grunt!.start(decodedMessage.payload);
                 break;
               case SupervisorMessages.kStop:
-                log.info("Got a stop message");
-                grunt.stop();
+                print("  > stop");
+                grunt!.stop();
                 break;
               case SupervisorMessages.kAck:
-                log.info("Got an ack message!");
+                print("  > ack");
                 break;
               default:
-                log.info("Invalid message: ${decodedMessage.messageCode}");
+                log.info("Invalid message: ${decodedMessage.messageCodeInfo}");
             }
-          } catch (e) {
-            log.info("ERROR!: $e");
+          } catch (e, stack) {
+            print("ERROR!: $e");
+            print(stack);
           }
         },
         cancelOnError: false,
@@ -132,13 +155,14 @@ class GruntChannel with LoggingMixin {
         });
 
     startupPing();
-    grunt.initialize(this);
+    grunt!.initialize(this);
   }
 
   Future startupPing() async {
-    if (_ready.isNotComplete) {
-      log.info("Sending boss our channel init message");
-      boss.send(GruntMessages.kReady);
+    if (!_ready.isCompleted) {
+      log.info("Sending boss our channel init message: attempt $_initCount");
+      boss!.send(GruntMessages.kReady);
+      _initCount++;
       await Future.delayed(Duration(milliseconds: 500), startupPing);
     } else {
       log.info("Boss got our ready message");
@@ -147,8 +171,10 @@ class GruntChannel with LoggingMixin {
 
   void close() {
     _sub?.cancel();
-    boss.close();
-    _done.complete();
+    boss!.close();
+    if (!_done.isCompleted) {
+      _done.complete();
+    }
   }
 
   Future get done {
@@ -156,8 +182,9 @@ class GruntChannel with LoggingMixin {
   }
 
   void updateStatus(WorkStatus status) {
-    boss.send(GruntMessages.kStatusUpdate, status.toJson(), Payload.kjson);
+    boss!.send(GruntMessages.kStatusUpdate, status.toJson(), Payload.kraw);
     if (status.phase == WorkPhase.error || status.phase == WorkPhase.stopped) {
+      log.warning("We should be stopped");
       this.close();
     }
   }

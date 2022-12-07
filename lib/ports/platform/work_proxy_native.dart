@@ -1,21 +1,17 @@
 // ignore_for_file: always_require_non_null_named_parameters
 
 import 'dart:async';
-import 'dart:html' as web;
 import 'dart:isolate';
-import 'package:async/async.dart';
-import 'package:isolate/isolate.dart';
-import 'package:sunny_dart/helpers.dart';
 import 'package:worker_service/ports/isolate_entry.dart';
 import 'package:worker_service/ports/ports.dart';
 import 'package:worker_service/ports/ports_shared.dart';
 
 Future<WorkIsolate> spawnWorkProxy(IsolateEntry entry,
-    {bool errorsAreFatal = true, String debugName}) async {
+    {bool errorsAreFatal = true, String? debugName}) async {
   var recv = ProxyReceivePort();
 
   /// Pass the
-  final isolate = await Isolate.spawn(entry.entryFunction, recv.sendPort,
+  final isolate = await Isolate.spawn(entry.entryFunction!, recv.sendPort,
       onExit: SendPortBridge(recv.sendPort),
       onError: SendPortBridge(recv.sendPort));
 
@@ -28,7 +24,7 @@ class IsolateSendPort implements SendPort2 {
   const IsolateSendPort(this.sendPort);
 
   @override
-  void send(Object message) {
+  void send(Object? message) {
     sendPort.send(message);
   }
 }
@@ -39,7 +35,7 @@ class SendPortBridge implements SendPort {
   SendPortBridge(this.delegate);
 
   @override
-  void send(Object message) {
+  void send(Object? message) {
     delegate.send(message);
   }
 
@@ -58,10 +54,9 @@ class WorkProxyIsolate extends WorkIsolate {
   final Isolate worker;
   final ReceivePort2 rcp;
 
-  WorkProxyIsolate({this.worker, this.rcp, bool errorsAreFatal = true})
-      : assert(worker != null),
-        assert(errorsAreFatal != null),
-        super(rcp.sendPort);
+  WorkProxyIsolate(
+      {required this.worker, required this.rcp, bool errorsAreFatal = true})
+      : super(rcp.sendPort);
 
   @override
   void addErrorListener(SendPort2 port) {
@@ -69,12 +64,12 @@ class WorkProxyIsolate extends WorkIsolate {
   }
 
   @override
-  void addOnExitListener(SendPort2 responsePort, {Object response}) {
+  void addOnExitListener(SendPort2 responsePort, {Object? response}) {
     worker.addOnExitListener(SendPortBridge(responsePort), response: response);
   }
 
   @override
-  String get debugName => worker.debugName;
+  String? get debugName => worker.debugName;
 
   @override
   void kill({int priority = WorkIsolate.beforeNextEvent}) {
@@ -82,14 +77,14 @@ class WorkProxyIsolate extends WorkIsolate {
   }
 
   @override
-  Capability2 pause([Capability2 resumeCapability]) => throw "na";
+  Capability2 pause([Capability2? resumeCapability]) => throw "na";
 
   @override
-  Capability2 get pauseCapability => null;
+  Capability2? get pauseCapability => null;
 
   @override
   void ping(SendPort2 responsePort,
-      {Object response, int priority = WorkIsolate.immediate}) {
+      {Object? response, int priority = WorkIsolate.immediate}) {
     worker.ping(SendPortBridge(responsePort),
         response: response, priority: priority);
   }
@@ -110,7 +105,7 @@ class WorkProxyIsolate extends WorkIsolate {
   }
 
   @override
-  Capability2 get terminateCapability => null;
+  Capability2? get terminateCapability => null;
 
   @override
   Stream get messages {

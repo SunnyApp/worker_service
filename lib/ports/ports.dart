@@ -100,7 +100,7 @@ abstract class WorkIsolate<P extends SendPort2> {
   ///
   /// If the isolate is spawned in a paused state, use this capability as
   /// argument to the [resume] method in order to resume the paused isolate.
-  final Capability2 pauseCapability;
+  final Capability2? pauseCapability;
 
   /// Capability granting the ability to terminate the isolate.
   ///
@@ -108,7 +108,7 @@ abstract class WorkIsolate<P extends SendPort2> {
   /// If the capability is `null`, or if it is not the correct termination
   /// capability of the isolate identified by [controlPort],
   /// then calls to those methods will have no effect.
-  final Capability2 terminateCapability;
+  final Capability2? terminateCapability;
 
   /// The name of the [WorkIsolate] displayed for debug purposes.
   ///
@@ -120,7 +120,7 @@ abstract class WorkIsolate<P extends SendPort2> {
   /// For a given isolate, this value will be the same as the values returned by
   /// `Dart_DebugName` in the C embedding API and the `debugName` property in
   /// [IsolateMirror].
-  String get debugName;
+  String? get debugName;
 
   WorkIsolate(this.controlPort,
       {this.pauseCapability, this.terminateCapability});
@@ -156,7 +156,7 @@ abstract class WorkIsolate<P extends SendPort2> {
   /// If [pauseCapability] is `null`, or it's not the pause capability
   /// of the isolate identified by [controlPort],
   /// the pause request is ignored by the receiving isolate.
-  Capability2 pause([Capability2 resumeCapability]) {
+  Capability2 pause([Capability2? resumeCapability]) {
     resumeCapability ??= Capability2();
     _pause(resumeCapability);
     return resumeCapability;
@@ -211,7 +211,7 @@ abstract class WorkIsolate<P extends SendPort2> {
   /* TODO(lrn): Can we do better? Can the system recognize this message and
    * send a reply if the receiving isolate is dead?
    */
-  external void addOnExitListener(SendPort2 responsePort, {Object response});
+  external void addOnExitListener(SendPort2 responsePort, {Object? response});
 
   /// Stops listening for exit messages from the isolate.
   ///
@@ -301,7 +301,7 @@ abstract class WorkIsolate<P extends SendPort2> {
   ///     after the current event, and any already scheduled control events,
   ///     are completed.
   external void ping(SendPort2 responsePort,
-      {Object response, int priority = immediate});
+      {Object? response, int priority = immediate});
 
   /**
    * Requests that uncaught errors of the isolate are sent back to [port].
@@ -388,7 +388,7 @@ abstract class SendPort2 implements Capability2 {
    * port can receive the message as soon as its isolate's event loop is ready
    * to deliver it, independently of what the sending isolate is doing.
    */
-  void send(Object message);
+  void send(Object? message);
 
   /**
    * Tests whether [other] is a [SendPort2] pointing to the same
@@ -451,8 +451,8 @@ abstract class ReceivePort2 implements Stream<dynamic> {
    * The stream closes when [close] is called.
    */
   @override
-  StreamSubscription<dynamic> listen(void onData(var message),
-      {Function onError, void onDone(), bool cancelOnError});
+  StreamSubscription<dynamic> listen(void onData(var message)?,
+      {Function? onError, void onDone()?, bool? cancelOnError});
 
   /**
    * Closes `this`.
@@ -478,7 +478,7 @@ abstract class RawReceivePort2 {
    * can not be paused. The data-handler must be set before the first
    * event is received.
    */
-  external factory RawReceivePort2([Function handler]);
+  external factory RawReceivePort2([Function? handler]);
 
   /**
    * Sets the handler that is invoked for every incoming message.

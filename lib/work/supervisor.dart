@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-import 'package:sunny_dart/extensions.dart';
-import 'package:sunny_dart/helpers.dart';
+import 'package:logging/logging.dart';
 
 import 'grunt.dart';
 import 'grunt_channel.dart';
@@ -13,7 +11,9 @@ import 'platform/grunt_platform_interface.dart'
     if (dart.library.js) 'platform/grunt_platform_web.dart';
 import 'work.dart';
 
-class Supervisor<G extends Grunt> with LoggingMixin {
+class Supervisor<G extends Grunt> {
+  static final log = Logger("<< supervisor");
+
   /// This is how we send and receive messages to/from the worker
   final DuplexChannel grunt;
 
@@ -21,13 +21,13 @@ class Supervisor<G extends Grunt> with LoggingMixin {
 
   /// The last status reported by the worker
   WorkStatus _status = const WorkStatus.ready();
-  final _ready = SafeCompleter();
+  final _ready = Completer();
 
-  StreamSubscription _sub;
+  StreamSubscription? _sub;
   final _ctrl = StreamController<WorkStatus>.broadcast();
 
   static Future<Supervisor> create<G extends Grunt>(GruntFactory<G> entry,
-      {bool debug = false, @required bool isProduction}) async {
+      {bool debug = false, required bool isProduction}) async {
     return debug == true
         ? Supervisor.debug(entry)
         : Supervisor(
@@ -45,13 +45,15 @@ class Supervisor<G extends Grunt> with LoggingMixin {
     return supervisor;
   }
 
-  Supervisor({@required this.gruntType, @required this.grunt}) {
+  Supervisor({required this.gruntType, required this.grunt}) {
     _sub = grunt.inbound.listen((DecodedMessage event) {
-      log.info("Supervisor got update: ${event.messageCode}");
+      log.info(
+          " got message from worker: ${event.messageCodeInfo}: ${event.payload?.runtimeType}");
       switch (event.messageCode) {
         case GruntMessages.kReady:
-          log.info("Got ready message!");
-          _ready.complete();
+          if (!_ready.isCompleted) {
+            _ready.complete();
+          }
           grunt.send(SupervisorMessages.kAck);
           break;
         case GruntMessages.kStatusUpdate:
@@ -60,6 +62,16 @@ class Supervisor<G extends Grunt> with LoggingMixin {
           }
           var workStatus = WorkStatus.fromJson(event.payload);
           if (workStatus != null) {
+            log.info("  * details: ${workStatus.message}");
+            if (workStatus.percentComplete != null) {
+              log.info(
+                  "  * pct: ${(workStatus.percentComplete! * 100).toInt() / 100}%");
+            }
+            if (workStatus.error != null) {
+              log.info("  * error: ${workStatus.error}");
+            }
+            log.info("  ---------------------------------");
+
             _status = _status + workStatus;
             _ctrl.add(_status);
           }
@@ -72,17 +84,22 @@ class Supervisor<G extends Grunt> with LoggingMixin {
 
   WorkStatus get status => _status;
 
-  String get jobId => status?.jobId;
+  String? get jobId => status.jobId;
 
   Future waitFor(WorkPhase t,
-      {Duration timeout, FutureOr<WorkStatus> onTimeout()}) async {
+      {Duration? timeout, FutureOr<WorkStatus> onTimeout()?}) async {
     try {
       if (_status.phase < t) {
         log.warning(
             'We are still in ${_status.phase} phase - waiting for $t${timeout == null ? '' : ' (timeout ${timeout.inMilliseconds}'}');
-        return _ctrl.stream
-            .firstWhere((element) => element.phase >= t)
-            .maybeTimeout(timeout, onTimeout);
+        final fw = _ctrl.stream.firstWhere((element) => element.phase >= t);
+        if (timeout == null) {
+          return fw;
+        } else if (timeout.inMicroseconds <= 0) {
+          return fw;
+        } else {
+          return fw.timeout(timeout, onTimeout: onTimeout);
+        }
       } else {
         log.warning(
             'We are at ${_status.phase} phase - good enough to move on to for $t');
@@ -94,7 +111,7 @@ class Supervisor<G extends Grunt> with LoggingMixin {
     }
   }
 
-  Future start({params, Duration timeout}) async {
+  Future start({params, Duration? timeout}) async {
     await waitFor(WorkPhase.initializing, timeout: timeout);
     grunt.send(SupervisorMessages.kStart, params);
   }

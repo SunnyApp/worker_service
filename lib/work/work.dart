@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 
 import 'grunt.dart';
 
@@ -13,29 +12,25 @@ enum WorkPhase {
   error
 }
 
-extension WorkPhaseVerify on WorkPhase {
+extension WorkPhaseVerify on WorkPhase? {
   bool verify(Grunt job) {
     return job.workPhase == this;
   }
 
   bool operator >(WorkPhase a) {
-    assert(a != null || this != null);
-    return this.ordinal > a.ordinal;
+    return this!.ordinal > a.ordinal;
   }
 
   bool operator <(WorkPhase a) {
-    assert(a != null || this != null);
-    return this.ordinal < a.ordinal;
+    return this!.ordinal < a.ordinal;
   }
 
   bool operator >=(WorkPhase a) {
-    assert(a != null || this != null);
-    return this.ordinal >= a.ordinal;
+    return this!.ordinal >= a.ordinal;
   }
 
   bool operator <=(WorkPhase a) {
-    assert(a != null || this != null);
-    return this.ordinal <= a.ordinal;
+    return this!.ordinal <= a.ordinal;
   }
 
   bool get isStopped {
@@ -69,19 +64,19 @@ extension WorkPhaseVerify on WorkPhase {
 }
 
 class WorkStatus extends Equatable {
-  final String jobId;
-  final WorkPhase phase;
-  final String message;
-  final String error;
-  final String errorStack;
-  final double completed;
-  final double total;
-  final double percentComplete;
-  final Map<String, dynamic> more;
+  final String? jobId;
+  final WorkPhase? phase;
+  final String? message;
+  final String? error;
+  final String? errorStack;
+  final double? completed;
+  final double? total;
+  final double? percentComplete;
+  final Map<String, dynamic>? more;
 
   const WorkStatus(
       {this.phase,
-      @required this.jobId,
+      required this.jobId,
       this.message,
       this.more,
       this.error,
@@ -91,7 +86,7 @@ class WorkStatus extends Equatable {
       this.total});
 
   @override
-  List<Object> get props {
+  List<Object?> get props {
     return [jobId, phase, more, message, completed, total, percentComplete];
   }
 
@@ -110,15 +105,15 @@ class WorkStatus extends Equatable {
   }
 
   WorkStatus copyWith({
-    WorkPhase phase,
-    String jobId,
-    String message,
-    Object error,
-    String errorStack,
-    double completed,
-    double total,
-    double percentComplete,
-    Map<String, dynamic> more,
+    WorkPhase? phase,
+    String? jobId,
+    String? message,
+    Object? error,
+    String? errorStack,
+    double? completed,
+    double? total,
+    double? percentComplete,
+    Map<String, dynamic>? more,
   }) {
     return WorkStatus(
       jobId: jobId ?? this.jobId,
@@ -133,18 +128,18 @@ class WorkStatus extends Equatable {
     );
   }
 
-  factory WorkStatus.fromJson(json) {
+  static WorkStatus? fromJson(json) {
     if (json == null) return null;
     return WorkStatus(
-      jobId: json['jobId'] as String,
-      phase: workPhaseOf(json['phase'] as int),
-      message: json['message'] as String,
+      jobId: json['jobId'] as String?,
+      phase: workPhaseOf(json['phase'] as int?),
+      message: json['message'] as String?,
       error: json['error']?.toString(),
-      errorStack: json['errorStack'] as String,
-      more: json['more'] as Map<String, dynamic>,
-      completed: json['completed'] as double,
-      percentComplete: json['percentComplete'] as double,
-      total: json['total'] as double,
+      errorStack: json['errorStack'] as String?,
+      more: json['more'] as Map<String, dynamic>?,
+      completed: json['completed'] as double?,
+      percentComplete: json['percentComplete'] as double?,
+      total: json['total'] as double?,
     );
   }
 
@@ -175,7 +170,7 @@ class WorkStatus extends Equatable {
 }
 
 class Work {
-  final String jobId;
+  final String? jobId;
 
   Work({this.jobId});
 }

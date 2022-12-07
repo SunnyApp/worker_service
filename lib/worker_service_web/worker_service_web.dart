@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:html' as web;
 
-import 'package:isolate/runner.dart';
+import 'package:isolates/isolates.dart';
+import 'package:isolates/runner_factory.dart';
+import 'package:logging_config/logging_config.dart';
+import 'package:logging_config/logging_environment.dart';
 import 'package:worker_service/common.dart';
 
 import 'common_web.dart';
@@ -13,7 +16,7 @@ class SameIsolateRunner implements Runner {
 
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {Duration timeout, FutureOr<R> Function() onTimeout}) {
+      {Duration? timeout, FutureOr<R> Function()? onTimeout}) {
     return Future.value(function(argument));
   }
 }
@@ -41,8 +44,11 @@ class WebWorkerRunner implements Runner {
       } else if (response.isSuccess) {
         completer.complete(response.result);
       } else {
-        _errors.add(response.error);
-        completer.completeError(response.error);
+        final error = response.error;
+        _errors.add(error);
+        if (error is Object) {
+          completer.completeError(error);
+        }
       }
     }, cancelOnError: false, onError: (err) {});
   }
@@ -58,7 +64,7 @@ class WebWorkerRunner implements Runner {
 
   @override
   Future<R> run<R, P>(FutureOr<R> Function(P argument) function, P argument,
-      {Duration timeout, FutureOr<R> Function() onTimeout}) {
+      {Duration? timeout, FutureOr<R> Function()? onTimeout}) {
     final _id = ++jobId;
     final invocation = RunnerInvocation(_id, function, argument);
     final completer = Completer<R>();
@@ -83,13 +89,13 @@ class WebWorkerServicePlatform implements WorkerServicePlatform {
   }
 
   @override
-  FutureOr<bool> pingRunner(Runner runner, {Duration timeout}) async {
+  FutureOr<bool> pingRunner(Runner runner, {Duration? timeout}) async {
     final result = await runner.run(_ping, null);
     return result;
   }
 
   @override
-  FutureOr<bool> killRunner(Runner runner, {Duration timeout}) async {
+  FutureOr<bool> killRunner(Runner runner, {Duration? timeout}) async {
     if (runner is WebWorkerRunner) {
       await runner.close();
       return true;
@@ -110,4 +116,17 @@ Future<Runner> spawnRunner(RunnerBuilder builder) async {
 
 bool _ping(_) {
   return true;
+}
+
+WebWorkerLoggingEnvironment workerLogEnvironment() =>
+    const WebWorkerLoggingEnvironment();
+
+class WebWorkerLoggingEnvironment implements LoggingEnvironment {
+  const WebWorkerLoggingEnvironment();
+
+  @override
+  String get envName => "web-worker";
+
+  @override
+  void onLogConfig(LogConfig logConfig) {}
 }

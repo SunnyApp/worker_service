@@ -1,4 +1,4 @@
-import 'package:sunny_dart/helpers.dart';
+import 'package:logging/logging.dart';
 
 import 'grunt.dart';
 import 'message.dart';
@@ -7,7 +7,6 @@ import 'message.dart';
 var _gruntRegistry = _GruntRegistry._();
 _GruntRegistry get gruntRegistry => _gruntRegistry;
 set gruntRegistry(_GruntRegistry registry) {
-  assert(registry != null);
   _gruntRegistry = registry;
 }
 
@@ -15,7 +14,7 @@ typedef GruntFactoryFn<G extends Grunt> = G Function();
 
 abstract class GruntFactory<G extends Grunt> {
   String get key;
-  String get package;
+  String? get package;
   GruntFactoryFn<G> get create;
 
   /// The encoding you use for this type of operation
@@ -23,7 +22,7 @@ abstract class GruntFactory<G extends Grunt> {
 
   const GruntFactory();
   const factory GruntFactory.of(String key, GruntFactoryFn<G> create,
-      [String package]) = _GruntFactory;
+      [String? package]) = _GruntFactory;
 }
 
 extension GruntFactoryRegister on GruntFactory {
@@ -40,23 +39,20 @@ class _GruntFactory<G extends Grunt> extends GruntFactory<G> {
   final String key;
 
   @override
-  final String package;
+  final String? package;
 
-  const _GruntFactory(this.key, this.create, [this.package])
-      : assert(key != null),
-        assert(create != null),
-        super();
+  const _GruntFactory(this.key, this.create, [this.package]) : super();
 }
 
-class _GruntRegistry with LoggingMixin {
+class _GruntRegistry {
+  static final log = Logger("gruntRegistry");
+
   _GruntRegistry._();
 
   final _factories = <String, GruntFactory>{};
 
   _GruntRegistry operator +(GruntFactory factory) {
-    assert(factory != null);
     final key = factory.key;
-    assert(key != null);
     if (_factories.containsKey(key)) {
       log.warning("Grunt key already exists!: $key");
     }
@@ -65,6 +61,7 @@ class _GruntRegistry with LoggingMixin {
   }
 
   GruntFactory operator [](String key) {
-    return _factories[key] ?? illegalState("Factory not found for key $key");
+    return _factories[key] ??
+        (throw Exception("Factory not found for key $key"));
   }
 }

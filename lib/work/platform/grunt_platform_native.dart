@@ -3,16 +3,13 @@ import 'dart:isolate';
 
 import 'package:logging/logging.dart';
 import 'package:logging_config/logging_config.dart';
-import 'package:meta/meta.dart';
-import 'package:sunny_dart/helpers.dart';
-import 'package:sunny_dart/typedefs.dart';
 
 import '../grunt.dart';
 import '../grunt_channel.dart';
 import '../grunt_registry.dart';
 import '../message.dart';
 
-final _superLog = Logger("supervisor");
+// final _superLog = Logger("supervisor");
 final _gruntlog = Logger("grunt");
 
 Future _initializeGrunt(SendPort supervisorSendPort) async {
@@ -28,7 +25,7 @@ Future _initializeGrunt(SendPort supervisorSendPort) async {
     supervisorSendPort.send(rp.sendPort);
 
     var fn = (await gruntFn as Function);
-    var grunt = fn() as Grunt;
+    var grunt = fn() as Grunt?;
     GruntChannel(
         boss: IsolateDuplexChannel(
             () => _emitter.stream
@@ -44,7 +41,7 @@ Future _initializeGrunt(SendPort supervisorSendPort) async {
 }
 
 Future<DuplexChannel> createGruntChannel(GruntFactory factory,
-    {@required bool isProduction}) async {
+    {required bool isProduction}) async {
   var _inbound = StreamController.broadcast();
   var port = RawReceivePort(_inbound.add);
 
@@ -61,16 +58,16 @@ Future<DuplexChannel> createGruntChannel(GruntFactory factory,
 
 DuplexChannel connectToSupervisor(GruntFactory factory) {
   /// Is there anything to do?
-  return notImplemented();
+  throw Exception('Not implemented');
 }
 
 final _grunt = Logger("grunt");
 final _super = Logger("super");
 
 class IsolateDuplexChannel implements DuplexChannel {
-  final Getter<Stream> _inbound;
+  final Stream Function() _inbound;
   SendPort sendPort;
-  final Isolate isolate;
+  final Isolate? isolate;
   final Logger log;
   IsolateDuplexChannel(
     this._inbound,
@@ -88,14 +85,19 @@ class IsolateDuplexChannel implements DuplexChannel {
       _inbound().map((_) => DecodedMessage.decoded(_, encoding));
 
   @override
-  void send(int type, [dynamic payload, int contentType]) {
-    log.info("Sending message $type with payload $payload to the other side");
+  void send(int type, [dynamic payload, int? contentType]) {
+    // log.info("Sending message $type with payload $payload to the other side");
     final _payload = encoding.encode(Payload(contentType, payload));
-    sendPort.send([
-      type,
-      _payload.header,
-      _payload.data,
-    ]);
+    try {
+      sendPort.send([
+        type,
+        _payload.header,
+        _payload.data,
+      ]);
+    } catch (e, stack) {
+      log.severe("Error sending payload: $e", e, stack);
+      rethrow;
+    }
   }
 
   @override
