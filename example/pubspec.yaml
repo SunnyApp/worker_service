@@ -4,18 +4,18 @@ description: Demonstrates how to use the worker_service plugin
 environment: 
   sdk: '>=2.5.0 <3.0.0'
 dependencies: 
-  permission_handler: ^10.0.0
+  permission_handler: ^10.2.0
   dorker: ^0.1.4
   js: ^0.6.4
   sunny_dart: 
-    path: /Users/ericm/sunny/local_plugins/sunny_dart
+    path: /Users/ericm/reliveit/checkout/SunnyApp/sunny_dart
   flutter: 
     sdk: flutter
 dev_dependencies: 
-  build_runner: ^2.2.1
-  build_config: ^1.1.0
+  build_runner: ^2.3.2
+  build_config: ^1.1.1
   worker_service: 
-    path: /Users/ericm/sunny/local_plugins/worker_service
+    path: /Users/ericm/reliveit/checkout/SunnyApp/worker_service
   flutter_test: 
     sdk: flutter
 flutter: 
