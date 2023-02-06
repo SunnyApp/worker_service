@@ -6,13 +6,13 @@ environment:
 dependencies: 
   permission_handler: ^10.2.0
   dorker: ^0.1.4
-  js: ^0.6.4
+  js: ^0.6.7
   sunny_dart: 
     path: /Users/ericm/reliveit/checkout/SunnyApp/sunny_dart
   flutter: 
     sdk: flutter
 dev_dependencies: 
-  build_runner: ^2.3.2
+  build_runner: ^2.4.0
   build_config: ^1.1.1
   worker_service: 
     path: /Users/ericm/reliveit/checkout/SunnyApp/worker_service

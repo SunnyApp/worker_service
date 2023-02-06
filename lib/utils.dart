@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
 
-const u = Uuid();
+final u = Uuid();
 
 String uuid() {
   return u.v4();
